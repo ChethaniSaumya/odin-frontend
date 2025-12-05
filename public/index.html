@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Odin Genesis NFT - Join The Nine Realms"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontSize: {
+              'xs': ['1rem', { lineHeight: '1.6' }],          // 16px
+              'sm': ['1.125rem', { lineHeight: '1.7' }],      // 18px
+              'base': ['1.375rem', { lineHeight: '1.8' }],    // 22px - LARGE base
+              'lg': ['1.625rem', { lineHeight: '1.8' }],      // 26px
+              'xl': ['2rem', { lineHeight: '1.6' }],          // 32px
+              '2xl': ['2.5rem', { lineHeight: '1.5' }],       // 40px
+              '3xl': ['3rem', { lineHeight: '1.4' }],         // 48px
+              '4xl': ['3.5rem', { lineHeight: '1.3' }],       // 56px
+              '5xl': ['4rem', { lineHeight: '1.2' }],         // 64px
+              '6xl': ['5rem', { lineHeight: '1.1' }],         // 80px
+              '7xl': ['6rem', { lineHeight: '1' }],           // 96px
+              '8xl': ['8rem', { lineHeight: '1' }],           // 128px
+            },
+            colors: {
+              'odin-gold': '#fbbf24',
+              'odin-gold-light': '#fcd34d',
+              'odin-gold-dark': '#f59e0b',
+            },
+            fontFamily: {
+              norse: ['Norse', 'Inter', 'sans-serif'],
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'shimmer': 'shimmer 2s infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              glow: {
+                '0%': { textShadow: '0 0 10px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3)' },
+                '100%': { textShadow: '0 0 20px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.5)' },
+              },
+              shimmer: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
+              },
+            },
+          }
+        }
+      }
+    </script>
+    
+    <title>Odin Genesis NFT</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
