@@ -1337,7 +1337,7 @@ const Mint = () => {
             {/* Contract & Collection Links */}
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
-                href={`https://hashscan.io/${NETWORK}/contract/${CONTRACT_ID}`}
+                href={`https://hashscan.io/${NETWORK}/token/${CONTRACT_ID}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
