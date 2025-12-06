@@ -892,6 +892,61 @@ const Mint = () => {
               <div className="text-sm text-gray-400 uppercase tracking-wider">Total Supply</div>
             </div>
           </div>
+          {/* Ultra-Rare 1/1 Announcement */}
+          <div className="max-w-4xl mx-auto mb-12 px-4">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-black/60 to-amber-900/40 backdrop-blur-sm border-2 border-amber-500/50 p-6 md:p-8 shadow-2xl">
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-amber-400/60 rounded-tl-2xl"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-amber-400/60 rounded-br-2xl"></div>
+
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-amber-500/10 to-purple-500/10 animate-pulse"></div>
+
+              <div className="relative z-10">
+                {/* Header with icon - CENTERED ON MOBILE */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+                  <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
+                  <h3 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 text-center">
+                    Ultra-Rare 1/1 Masterpieces
+                  </h3>
+                  <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
+                </div>
+
+                {/* Divider */}
+                <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mb-6"></div>
+
+                {/* Content */}
+                <div className="space-y-4 text-gray-200">
+                  <p className="text-base sm:text-lg leading-relaxed text-center">
+                    Alongside the Genesis mint, the collection contains{' '}
+                    <span className="text-amber-400 font-bold">twelve ultra-rare 1/1 NFTs</span>,
+                    each with its own unique artwork and lore.
+                  </p>
+
+                  <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
+                    These will <span className="text-amber-300 font-semibold">not be minted publicly</span>.
+                    Instead, they will be awarded through high-impact community activations, exclusive giveaways,
+                    auctions, and special collaborations.
+                  </p>
+
+                  <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
+                    Their scarcity—and the utility tied to them—makes these some of the{' '}
+                    <span className="text-amber-400 font-bold">most coveted pieces</span> in the entire Odin universe.
+                  </p>
+                </div>
+
+                {/* Badge - CENTERED ON MOBILE */}
+                <div className="mt-6 flex justify-center">
+                  <div className="inline-flex flex-col sm:flex-row items-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-purple-600/30 to-amber-600/30 border border-amber-400/50 rounded-full text-center">
+                    <Info className="w-5 h-5 text-amber-400" />
+                    <span className="text-xs sm:text-sm font-semibold text-amber-300">
+                      12 Legendary 1/1 Editions • Distribution via Special Events
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Loading State Overlay */}
           {isLoadingTiers && !supplyData && (
@@ -929,7 +984,7 @@ const Mint = () => {
               </div>
             </div>
           ) : (
-           <div className="max-w-4xl mx-auto mb-12">
+            <div className="max-w-4xl mx-auto mb-12">
               <div className="relative overflow-hidden bg-gradient-to-br from-green-900/10 via-transparent to-transparent border-2 border-green-500/40 rounded-2xl backdrop-blur-md">
                 {/* Subtle glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent" />
