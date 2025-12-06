@@ -229,9 +229,9 @@ class HederaWalletService {
       const transaction = new TransferTransaction()
         .addHbarTransfer(this.accountId, negativeAmount)
         .addHbarTransfer(toAccountId, amount)
-        .setTransactionMemo('Odin Genesis NFT Payment');
+        .setTransactionMemo('Odin Payment');
 
-      console.log('ðŸ“ Transaction created, executing with signer...');
+      console.log('Transaction created, executing with signer...');
 
       try {
         // Use the signer to execute the transaction
