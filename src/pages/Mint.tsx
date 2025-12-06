@@ -236,13 +236,13 @@ const Mint = () => {
   const initializeWalletConnect = async () => {
     try {
       const metadata = {
-        name: "Odin Genesis NFT",
-        description: "Mint your Odin Genesis NFT",
+        name: "Odin",
+        description: "OdinCoin ($ODIN) powers The Nine Realms as its utility and governance token, offering NFT holders early claims, staking rewards, and exclusive airdrops. Its burn-and-reward system drives growth and lasting value across the digital and physical realms",
         url: window.location.origin,
         icons: ['https://www.hashgraph.com/favicon.ico']
       };
 
-      const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '4f21b4ddac58f70e52f42df326a08f4e';
+      const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '8f76b1b5b05efbd3b4d262b8c46075d4';
       await hederaWalletService.initialize(projectId, metadata);
       console.log('WalletConnect initialized successfully');
     } catch (err) {
@@ -526,7 +526,7 @@ const Mint = () => {
       console.log('ðŸŽ‰ NFT Minted Successfully!', result.nftDetails);
 
       // Your IPFS CID where metadata is stored
-      const METADATA_CID = "bafybeiaa7g25quq7uvaw7s5x2sxalhv6dzkuvviwvqi54oxzhyeo3by7zu";
+      const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu";
 
       // Process ALL minted NFTs (supports batch minting)
       const mintedNFTsArray: MintedNFT[] = [];
@@ -732,7 +732,7 @@ const Mint = () => {
       } else {
         // Single mint result
         // Single mint result
-        const METADATA_CID = "bafybeiaa7g25quq7uvaw7s5x2sxalhv6dzkuvviwvqi54oxzhyeo3by7zu"; // Same CID as above
+        const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu"; // Same CID as above
         const metadataTokenId = result.metadataTokenId || result.serialNumber;
 
         try {
@@ -1353,7 +1353,7 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Each Odin Genesis NFT is randomly generated with unique traits and attributes
+                    Each Odin is randomly generated with unique traits and attributes
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
