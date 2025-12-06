@@ -1223,11 +1223,11 @@ const Mint = () => {
                         Minting {quantity} Hero{quantity > 1 ? 'es' : ''}...
                       </span>
                     ) : !wallet.isConnected ? (
-                      'âš ï¸ Connect Wallet to Mint'
+                      'Connect Wallet to Mint'
                     ) : isLoadingTiers ? (
-                      'ðŸ”„ Loading Tier Data...'
+                      'Loading Tier Data...'
                     ) : !supplyData ? (
-                      'ðŸ”„ Loading Supply...'
+                      'Loading Supply...'
                     ) : (
                       `⚔️ MINT ${quantity} ${quantity > 1 ? 'HEROES' : 'HERO'} ⚔️`
                     )}
