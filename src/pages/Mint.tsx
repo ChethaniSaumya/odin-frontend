@@ -51,7 +51,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
     //price: 14,
-    price: 1,
+    price: 1400,
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -63,7 +63,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   rare: {
     name: 'Rare Champion',
     //price: 72,
-    price: 2,
+    price: 7200,
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -75,7 +75,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   legendary: {
     name: 'Legendary Hero',
     //price: 220,
-    price: 3,
+    price: 22000,
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
