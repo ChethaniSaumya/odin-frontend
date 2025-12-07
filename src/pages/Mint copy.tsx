@@ -18,8 +18,6 @@ const MIRROR_NODE_URL = NETWORK === 'mainnet'
   ? 'https://mainnet-public.mirrornode.hedera.com'
   : 'https://testnet.mirrornode.hedera.com';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-const SENTX_URL = process.env.REACT_APP_SENTX_MARKETPLACE_URL;
-const KABILA_URL = process.env.REACT_APP_KABILA_MARKETPLACE_URL;
 
 interface NFTTier {
   name: string;
@@ -30,32 +28,6 @@ interface NFTTier {
   benefits: string[];
   color: string;
 }
-
-interface DynamicPricing {
-  hbarUsdPrice: number;
-  lastUpdated: string;
-  tiers: {
-    common: {
-      usdPrice: number;
-      hbarPrice: number;
-      odinAllocation: number;
-      available: number;
-    };
-    rare: {
-      usdPrice: number;
-      hbarPrice: number;
-      odinAllocation: number;
-      available: number;
-    };
-    legendary: {
-      usdPrice: number;
-      hbarPrice: number;
-      odinAllocation: number;
-      available: number;
-    };
-  };
-}
-
 
 interface WalletState {
   accountId: string | null;
@@ -74,11 +46,12 @@ interface MintedNFT {
   };
 }
 
+// Tier definitions as constants
 const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
-    //price: 100,  // USD price (HBAR calculated dynamically)
-    price: 0.1,  // USD price (HBAR calculated dynamically)
+    //price: 14,
+    price: 1400,
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -89,8 +62,8 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   },
   rare: {
     name: 'Rare Champion',
-    //price: 500,  // USD price (HBAR calculated dynamically)
-    price: 0.2,  // USD price (HBAR calculated dynamically)
+    //price: 72,
+    price: 7200,
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -101,8 +74,8 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   },
   legendary: {
     name: 'Legendary Hero',
-    //price: 1500,  // USD price (HBAR calculated dynamically)
-    price: 0.3,  // USD price (HBAR calculated dynamically)
+    //price: 220,
+    price: 22000,
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -113,7 +86,6 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
     color: 'from-amber-500 to-orange-700'
   }
 };
-
 
 const TIER_ICONS = {
   common: Shield,
@@ -150,9 +122,6 @@ const Mint = () => {
   const totalSupply = 5000;
   const remainingSupply = totalSupply - totalMinted;
   const [isLoadingTiers, setIsLoadingTiers] = useState(true);
-  const [dynamicPricing, setDynamicPricing] = useState<DynamicPricing | null>(null);
-  const [hbarUsdRate, setHbarUsdRate] = useState<number>(0.07); // Default fallback
-  const [priceLoading, setPriceLoading] = useState<boolean>(true);
 
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
@@ -182,67 +151,6 @@ const Mint = () => {
       return null;
     }
   };
-
-  const fetchDynamicPricing = async () => {
-    try {
-      setPriceLoading(true);
-      console.log('💰 Fetching dynamic pricing...');
-
-      const response = await axios.get(`${API_BASE_URL}/api/mint/dynamic-pricing`);
-
-      if (response.data.success) {
-        setDynamicPricing(response.data);
-        setHbarUsdRate(response.data.hbarUsdPrice);
-
-        // Also update supply data from the same response
-        setSupplyData({
-          common: {
-            available: response.data.tiers.common.available,
-            total: 2488,
-            minted: 2488 - response.data.tiers.common.available
-          },
-          rare: {
-            available: response.data.tiers.rare.available,
-            total: 1750,
-            minted: 1750 - response.data.tiers.rare.available
-          },
-          legendary: {
-            available: response.data.tiers.legendary.available,
-            total: 750,
-            minted: 750 - response.data.tiers.legendary.available
-          }
-        });
-
-        console.log('✅ Dynamic pricing loaded:', {
-          hbarPrice: response.data.hbarUsdPrice,
-          common: response.data.tiers.common.hbarPrice + ' HBAR',
-          rare: response.data.tiers.rare.hbarPrice + ' HBAR',
-          legendary: response.data.tiers.legendary.hbarPrice + ' HBAR'
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch dynamic pricing:', error);
-      // Keep using fallback prices
-    } finally {
-      setPriceLoading(false);
-      setIsLoadingTiers(false);
-    }
-  };
-
-
-  // ============================================
-  // ADD/UPDATE useEffect FOR PRICING (around line 200)
-  // ============================================
-
-  // Fetch dynamic pricing on mount and refresh every 60 seconds
-  useEffect(() => {
-    fetchDynamicPricing();
-
-    // Refresh pricing every 60 seconds
-    const priceInterval = setInterval(fetchDynamicPricing, 60000);
-
-    return () => clearInterval(priceInterval);
-  }, []);
 
   // Initialize WalletConnect on component mount and restore session
   useEffect(() => {
@@ -346,11 +254,11 @@ const Mint = () => {
   };
 
   // Fetch supply on component mount and refresh periodically
-  /*useEffect(() => {
-      fetchSupply();
-      const interval = setInterval(fetchSupply, 30000); // Refresh every 30 seconds
-      return () => clearInterval(interval);
-    }, []);*/
+  useEffect(() => {
+    fetchSupply();
+    const interval = setInterval(fetchSupply, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Initialize tiers when supply data changes
   useEffect(() => {
@@ -468,56 +376,25 @@ const Mint = () => {
     }
   };
 
+  // Get current tier safely - NEVER return price: 0
   const getCurrentTier = () => {
-    const tierKey = selectedTier as 'common' | 'rare' | 'legendary';
-
-    // If dynamic pricing is loaded, use it
-    if (dynamicPricing?.tiers[tierKey]) {
-      const dynamicTier = dynamicPricing.tiers[tierKey];
+    // If tiers are still loading, return a temporary object with actual prices from TIER_DEFINITIONS
+    if (!tiers[selectedTier]) {
       return {
-        name: TIER_DEFINITIONS[tierKey].name,
-        price: dynamicTier.hbarPrice,        // Dynamic HBAR price
-        usdPrice: dynamicTier.usdPrice,      // USD price for display
-        odinAllocation: dynamicTier.odinAllocation,
-        available: dynamicTier.available,
-        icon: TIER_ICONS[tierKey],
-        benefits: TIER_DEFINITIONS[tierKey].benefits,
-        color: TIER_DEFINITIONS[tierKey].color
+        name: TIER_DEFINITIONS[selectedTier].name,
+        price: TIER_DEFINITIONS[selectedTier].price,
+        odinAllocation: TIER_DEFINITIONS[selectedTier].odinAllocation,
+        available: 0,
+        icon: TIER_ICONS[selectedTier],
+        benefits: TIER_DEFINITIONS[selectedTier].benefits,
+        color: TIER_DEFINITIONS[selectedTier].color
       };
     }
 
-    // Fallback to static USD prices converted at fallback rate
-    const fallbackHbarRate = 0.07; // Fallback HBAR price
-    const usdPrice = TIER_DEFINITIONS[tierKey].price;
-
-    return {
-      name: TIER_DEFINITIONS[tierKey].name,
-      price: Math.ceil(usdPrice / fallbackHbarRate), // Convert USD to HBAR
-      usdPrice: usdPrice,
-      odinAllocation: TIER_DEFINITIONS[tierKey].odinAllocation,
-      available: supplyData?.[tierKey]?.available || 0,
-      icon: TIER_ICONS[tierKey],
-      benefits: TIER_DEFINITIONS[tierKey].benefits,
-      color: TIER_DEFINITIONS[tierKey].color
-    };
+    return tiers[selectedTier];
   };
 
   const currentTier = getCurrentTier();
-
-  const formatPrice = (hbarAmount: number, usdAmount?: number) => {
-    if (usdAmount) {
-      return `$${usdAmount.toLocaleString()} (~${hbarAmount.toLocaleString()} HBAR)`;
-    }
-    return `${hbarAmount.toLocaleString()} HBAR`;
-  };
-
-  const formatHbarWithUsd = (hbarAmount: number) => {
-    const usdValue = hbarAmount * hbarUsdRate;
-    return {
-      hbar: hbarAmount.toLocaleString(),
-      usd: usdValue.toFixed(2)
-    };
-  };
 
 
   const initiateMint = async (selectedTier: 'common' | 'rare' | 'legendary', mintQuantity: number) => {
@@ -1241,16 +1118,9 @@ const Mint = () => {
                       </div>
 
                       <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                      <div className="text-center mb-4">
-                        <div className="text-2xl font-bold text-green-400">
-                          ${dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.usdPrice || TIER_DEFINITIONS[key].price}
-                        </div>
-                        <div className="text-xl font-bold text-amber-400">
-                          {dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.hbarPrice?.toLocaleString() || '...'} HBAR
-                        </div>
+                      <div className="text-3xl font-bold text-amber-400 mb-4">
+                        {tier.price.toLocaleString()} HBAR
                       </div>
-
-
 
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-between text-base">
@@ -1311,14 +1181,11 @@ const Mint = () => {
 
                 {/* Right: Cost Breakdown */}
                 <div>
-
+                  <h3 className="text-xl font-bold mb-6 text-amber-400">Cost Breakdown</h3>
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center pb-3 border-b border-white/10">
                       <span className="text-gray-300">{quantity} × {currentTier.name}</span>
-                      <div className="text-right">
-                        <div className="font-bold text-lg">{(currentTier.price * quantity).toLocaleString()} HBAR</div>
-                        <div className="text-sm text-green-400">${((currentTier.usdPrice || 0) * quantity).toLocaleString()}</div>
-                      </div>
+                      <span className="font-bold text-lg">{(currentTier.price * quantity).toLocaleString()} HBAR</span>
                     </div>
                     <div className="flex justify-between items-center pb-3 border-b border-white/10">
                       <span className="text-gray-300">Network Fee (est.)</span>
@@ -1326,14 +1193,12 @@ const Mint = () => {
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-xl font-bold">Total Cost</span>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-amber-400">
-                          {(currentTier.price * quantity + estimatedGas).toLocaleString()} HBAR
-                        </div>
-                        <div className="text-lg text-green-400">
-                          ${((currentTier.usdPrice || 0) * quantity).toLocaleString()} USD
-                        </div>
-                      </div>
+                      <span className="text-3xl font-bold text-amber-400">
+                        {(currentTier.price * quantity + estimatedGas).toLocaleString()} HBAR
+                      </span>
+                    </div>
+                    <div className="text-center text-sm text-gray-400">
+                      ≈ ${((currentTier.price * quantity + estimatedGas) * 0.07).toFixed(2)} USD
                     </div>
                   </div>
 
@@ -1449,9 +1314,35 @@ const Mint = () => {
               </div>
 
               <p className="text-gray-300 mb-6 text-base leading-relaxed">
-                8% royalty on all secondary sales
+                8% royalty on all secondary sales, distributed as follows:
               </p>
 
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-purple-400 rounded-full flex-shrink-0 mt-2" />
+                  <span className="text-base leading-relaxed">
+                    <span className="font-bold text-purple-400">3%</span> → Digital Realms Treasury / $ODIN liquidity
+                  </span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-purple-400 rounded-full flex-shrink-0 mt-2" />
+                  <span className="text-base leading-relaxed">
+                    <span className="font-bold text-purple-400">2%</span> → $HBARBARIAN buyback & liquidity
+                  </span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-purple-400 rounded-full flex-shrink-0 mt-2" />
+                  <span className="text-base leading-relaxed">
+                    <span className="font-bold text-purple-400">2%</span> → Development & creative teams
+                  </span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-purple-400 rounded-full flex-shrink-0 mt-2" />
+                  <span className="text-base leading-relaxed">
+                    <span className="font-bold text-purple-400">1%</span> → Artist & Blue Economy fund
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Important Information */}
@@ -1514,23 +1405,23 @@ const Mint = () => {
               </a>
 
               <a
-                href={SENTX_URL}
+                href={`https://hashaxis.com/collection/${CONTRACT_ID}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
               >
                 <ExternalLink className="w-5 h-5" />
-                <span>View on Sentx</span>
+                <span>View on HashAxis</span>
               </a>
 
               <a
-                href={KABILA_URL}
+                href={`https://zuse.market/collection/${CONTRACT_ID}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
               >
                 <ExternalLink className="w-5 h-5" />
-                <span>View on Kabila</span>
+                <span>View on Zuse</span>
               </a>
             </div>
           </div>
