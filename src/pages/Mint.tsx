@@ -50,7 +50,8 @@ interface MintedNFT {
 const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
-    price: 14,
+    //price: 14,
+    price: 1,
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -61,7 +62,8 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   },
   rare: {
     name: 'Rare Champion',
-    price: 72,
+    //price: 72,
+    price: 2,
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -72,7 +74,8 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   },
   legendary: {
     name: 'Legendary Hero',
-    price: 220,
+    //price: 220,
+    price: 3,
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -451,7 +454,7 @@ const Mint = () => {
       // Step 1: Send payment directly using WalletConnect
       setPaymentStatus('Sending payment...');
 
-      const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID || '0.0.7258242';
+      const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID || '0.0.10168171';
 
       const paymentResult = await hederaWalletService.sendHBAR(
         treasuryAccountId,

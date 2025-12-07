@@ -44,7 +44,7 @@ class HederaWalletService {
 
       this.dAppConnector = new DAppConnector(
         metadata,
-        LedgerId.MAINNET,
+        LedgerId.TESTNET,
         projectId
       );
 
@@ -199,7 +199,7 @@ class HederaWalletService {
     if (!this.accountId) throw new Error('No account connected');
 
     // Bypass the buggy WalletConnect balance query
-    const client = Client.forMainnet();
+    const client = Client.forTestnet();
     const query = new AccountBalanceQuery().setAccountId(this.accountId);
     const balance = await query.execute(client);
     return balance.hbars.toTinybars().toNumber();
