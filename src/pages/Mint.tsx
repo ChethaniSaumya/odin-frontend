@@ -1483,13 +1483,14 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Your NFTs and $ODIN allocation will appear in your wallet immediately after transaction confirmation
+                    Your NFTs will appear in your wallet immediately after transaction confirmation
+                    (Note: OdinCoin ($ODIN) will release later according to the official roadmap — it is not included with the NFT mint.)
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Network fees (gas) are required for all Hedera transactions - typically less than 1 HBAR
+                    Network fees (gas) are required for all Hedera transactions – typically less than 1 HBAR
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -1501,13 +1502,13 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Maximum {maxPerTransaction} NFTs per transaction - you can mint multiple times
+                     Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    View your NFTs on HashAxis or Zuse marketplace after minting
+                    View your NFTs on Sentx, Kabila, or directly inside your HashPack wallet after minting
                   </span>
                 </div>
               </div>
