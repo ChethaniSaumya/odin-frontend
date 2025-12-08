@@ -194,25 +194,6 @@ const Mint = () => {
         setDynamicPricing(response.data);
         setHbarUsdRate(response.data.hbarUsdPrice);
 
-        // Also update supply data from the same response
-        setSupplyData({
-          common: {
-            available: response.data.tiers.common.available,
-            total: 2488,
-            minted: 2488 - response.data.tiers.common.available
-          },
-          rare: {
-            available: response.data.tiers.rare.available,
-            total: 1750,
-            minted: 1750 - response.data.tiers.rare.available
-          },
-          legendary: {
-            available: response.data.tiers.legendary.available,
-            total: 750,
-            minted: 750 - response.data.tiers.legendary.available
-          }
-        });
-
         console.log('✅ Dynamic pricing loaded:', {
           hbarPrice: response.data.hbarUsdPrice,
           common: response.data.tiers.common.hbarPrice + ' HBAR',
@@ -222,10 +203,8 @@ const Mint = () => {
       }
     } catch (error) {
       console.error('Failed to fetch dynamic pricing:', error);
-      // Keep using fallback prices
     } finally {
       setPriceLoading(false);
-      setIsLoadingTiers(false);
     }
   };
 
@@ -242,6 +221,20 @@ const Mint = () => {
     const priceInterval = setInterval(fetchDynamicPricing, 60000);
 
     return () => clearInterval(priceInterval);
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchDynamicPricing();
+      await fetchSupply(); // ⭐ ADD THIS - it was missing!
+    };
+
+    loadData();
+
+    // Refresh both every 30 seconds
+    const interval = setInterval(loadData, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Initialize WalletConnect on component mount and restore session
@@ -372,33 +365,52 @@ const Mint = () => {
 
   const fetchSupply = async () => {
     try {
-      setIsLoadingTiers(true); // Start loading
+      console.log('📊 Fetching supply data...');
       const response = await axios.get(`${API_BASE_URL}/api/mint/stats`);
 
       if (response.data.success) {
         const stats = response.data;
 
+        // ⭐ FIX: Set supply data from API
         setSupplyData({
+          common: {
+            available: stats.byRarity.common.available,
+            total: stats.byRarity.common.total,
+            minted: stats.byRarity.common.minted
+          },
+          rare: {
+            available: stats.byRarity.rare.available,
+            total: stats.byRarity.rare.total,
+            minted: stats.byRarity.rare.minted
+          },
+          legendary: {
+            available: stats.byRarity.legendary.available,
+            total: stats.byRarity.legendary.total,
+            minted: stats.byRarity.legendary.minted
+          }
+        });
+
+        // ⭐ FIX: Set total minted
+        setTotalMinted(stats.totalMinted);
+
+        console.log('✅ Supply data loaded:', {
+          totalMinted: stats.totalMinted,
           common: stats.byRarity.common,
           rare: stats.byRarity.rare,
           legendary: stats.byRarity.legendary
         });
-        setTotalMinted(stats.totalMinted);
-
-        console.log('✅ Supply data loaded:', stats.byRarity);
       }
     } catch (err) {
-      console.log('API not ready, using static data');
+      console.error('❌ Failed to fetch supply:', err);
 
-      // Use static data as fallback
+      // Fallback data
       setSupplyData({
-        common: { available: 4447, total: 4447, minted: 0 },
-        rare: { available: 10, total: 10, minted: 0 },
-        legendary: { available: 2, total: 2, minted: 0 }
+        common: { available: 2488, total: 2488, minted: 0 },
+        rare: { available: 1750, total: 1750, minted: 0 },
+        legendary: { available: 750, total: 750, minted: 0 }
       });
-      setTotalMinted(541); // Airdropped NFTs
+      setTotalMinted(0);
     } finally {
-      // Always set loading to false after fetch completes
       setIsLoadingTiers(false);
     }
   };
