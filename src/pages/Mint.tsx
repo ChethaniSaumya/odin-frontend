@@ -970,7 +970,7 @@ const Mint = () => {
 
   // Calculate costs
   const mintCost = currentTier.price * quantity;
-  const estimatedGas = 0.5; // Estimated gas in HBAR
+  const estimatedGas = 0.005; // Estimated gas in HBAR
   const totalCost = mintCost + estimatedGas;
 
   return (
