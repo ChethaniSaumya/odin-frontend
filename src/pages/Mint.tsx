@@ -78,7 +78,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
     //price: 100,  // USD price (HBAR calculated dynamically)
-    price: 100,  // USD price (HBAR calculated dynamically)
+    price: 0.1,  // USD price (HBAR calculated dynamically)
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -90,7 +90,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   rare: {
     name: 'Rare Champion',
     //price: 500,  // USD price (HBAR calculated dynamically)
-    price: 500,  // USD price (HBAR calculated dynamically)
+    price: 0.2,  // USD price (HBAR calculated dynamically)
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -102,7 +102,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   legendary: {
     name: 'Legendary Hero',
     //price: 1500,  // USD price (HBAR calculated dynamically)
-    price: 1500,  // USD price (HBAR calculated dynamically)
+    price: 0.3,  // USD price (HBAR calculated dynamically)
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -154,13 +154,11 @@ const Mint = () => {
   const [hbarUsdRate, setHbarUsdRate] = useState<number>(0.07); // Default fallback
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
 
+  const METADATA_BASE_URL = "https://min.theninerealms.world/metadata";
+
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
-      // Your IPFS CID (replace with actual one)
-      const METADATA_CID = "QmYourMetadataCID"; // âš ï¸ Replace with your actual CID!
-
-      // Convert IPFS URI to HTTP gateway URL
-      const httpUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${tokenId}.json`;
+      const httpUrl = `${METADATA_BASE_URL}/${tokenId}.json`;
 
       console.log(`Fetching metadata from: ${httpUrl}`);
       const response = await fetch(httpUrl);
@@ -171,7 +169,6 @@ const Mint = () => {
 
       const metadata = await response.json();
 
-      // Now you have the actual metadata with image
       return {
         tokenId: tokenId.toString(),
         serialNumber,
@@ -532,233 +529,230 @@ const Mint = () => {
   };
 
 
-  const initiateMint = async (selectedTier: 'common' | 'rare' | 'legendary', mintQuantity: number) => {
-    try {
-      console.log('ðŸ” DEBUG: Starting mint process');
-      console.log('Tier:', selectedTier);
-      console.log('Quantity:', mintQuantity);
+const initiateMint = async (selectedTier: 'common' | 'rare' | 'legendary', mintQuantity: number) => {
+  try {
+    console.log('🔍 DEBUG: Starting mint process');
+    console.log('Tier:', selectedTier);
+    console.log('Quantity:', mintQuantity);
 
-      // Clear any previous success/error messages
-      setMintSuccess(false);
-      setMintedNFTs([]);
-      setError(null);
+    // Clear any previous success/error messages
+    setMintSuccess(false);
+    setMintedNFTs([]);
+    setError(null);
 
-      if (!wallet.isConnected || !wallet.accountId) {
-        setError('Please connect your wallet first');
-        return;
-      }
+    if (!wallet.isConnected || !wallet.accountId) {
+      setError('Please connect your wallet first');
+      return;
+    }
 
-      // Get tier with guaranteed pricing
-      const tier = getCurrentTier();
+    // Get tier with guaranteed pricing
+    const tier = getCurrentTier();
 
-      // Double-check pricing is loaded
-      if (!tier || tier.price === 0 || tier.price === undefined) {
-        setError('System error: Tier pricing not available. Please refresh the page.');
-        console.error('CRITICAL: Tier has no price:', tier);
-        return;
-      }
+    // Double-check pricing is loaded
+    if (!tier || tier.price === 0 || tier.price === undefined) {
+      setError('System error: Tier pricing not available. Please refresh the page.');
+      console.error('CRITICAL: Tier has no price:', tier);
+      return;
+    }
 
-      console.log('✅ Tier validation passed:', {
-        name: tier.name,
-        price: tier.price,
-        available: tier.available
-      });
+    console.log('✅ Tier validation passed:', {
+      name: tier.name,
+      price: tier.price,
+      available: tier.available
+    });
 
-      // Validate tier availability
-      if (tier.available < mintQuantity) {
-        setError(`Only ${tier.available} ${selectedTier} NFTs available`);
-        return;
-      }
+    // Validate tier availability
+    if (tier.available < mintQuantity) {
+      setError(`Only ${tier.available} ${selectedTier} NFTs available`);
+      return;
+    }
 
-      // Validate wallet balance
-      const totalCost = tier.price * mintQuantity;
+    // Validate wallet balance
+    const totalCost = tier.price * mintQuantity;
 
-      if (wallet.balance < totalCost) {
-        setError(`Insufficient balance. You need ${totalCost} HBAR (including gas fees)`);
-        return;
-      }
+    if (wallet.balance < totalCost) {
+      setError(`Insufficient balance. You need ${totalCost} HBAR (including gas fees)`);
+      return;
+    }
 
-      setIsMinting(true);
-      setPaymentStatus('Preparing payment...');
+    setIsMinting(true);
+    setPaymentStatus('Preparing payment...');
 
-      // Calculate amount from frontend pricing - KEEP AS HBAR
-      const amountInHbar = tier.price * mintQuantity;
+    // Calculate amount from frontend pricing - KEEP AS HBAR
+    const amountInHbar = tier.price * mintQuantity;
 
-      console.log(`ðŸ’° Sending ${amountInHbar} HBAR for ${mintQuantity} ${selectedTier} NFT(s)`);
+    console.log(`💰 Sending ${amountInHbar} HBAR for ${mintQuantity} ${selectedTier} NFT(s)`);
 
-      // Step 1: Send payment directly using WalletConnect
-      setPaymentStatus('Sending payment...');
+    // Step 1: Send payment directly using WalletConnect
+    setPaymentStatus('Sending payment...');
 
-      const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID || '0.0.10168171';
+    const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID || '0.0.10168171';
 
-      const paymentResult = await hederaWalletService.sendHBAR(
-        treasuryAccountId,
-        amountInHbar
-      );
+    const paymentResult = await hederaWalletService.sendHBAR(
+      treasuryAccountId,
+      amountInHbar
+    );
 
-      // CHECK FOR USER REJECTION
-      if (paymentResult.userRejected) {
-        console.log('ðŸ‘¤ User rejected transaction in wallet');
-        setIsMinting(false);
-        setPaymentStatus('');
-        return;
-      }
+    // CHECK FOR USER REJECTION
+    if (paymentResult.userRejected) {
+      console.log('👤 User rejected transaction in wallet');
+      setIsMinting(false);
+      setPaymentStatus('');
+      return;
+    }
 
-      if (!paymentResult.success) {
-        throw new Error('Payment failed');
-      }
+    if (!paymentResult.success) {
+      throw new Error('Payment failed');
+    }
 
-      console.log('✅ Payment sent successfully!');
-      console.log('ðŸ“‹ Transaction Hash:', paymentResult.transactionId);
+    console.log('✅ Payment sent successfully!');
+    console.log('📋 Transaction Hash:', paymentResult.transactionId);
 
-      // Step 2: Send transaction hash to backend for verification and minting
-      setPaymentStatus('Verifying payment and minting NFT...');
+    // Step 2: Send transaction hash to backend for verification and minting
+    setPaymentStatus('Verifying payment and minting NFT...');
 
-      console.log('ðŸ”„ Sending to backend:', {
+    console.log('📄 Sending to backend:', {
+      userAccountId: wallet.accountId,
+      rarity: selectedTier,
+      quantity: mintQuantity,
+      transactionHash: paymentResult.transactionId
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/mint/verify-and-mint`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         userAccountId: wallet.accountId,
         rarity: selectedTier,
         quantity: mintQuantity,
         transactionHash: paymentResult.transactionId
-      });
+      })
+    });
 
-      const response = await fetch(`${API_BASE_URL}/api/mint/verify-and-mint`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userAccountId: wallet.accountId,
-          rarity: selectedTier,
-          quantity: mintQuantity,
-          transactionHash: paymentResult.transactionId
-        })
-      });
-
-      // Check if response is OK
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log('ðŸ“Š Backend response:', result);
-
-      // Check if result has success
-      if (!result.success) {
-        throw new Error(result.error || 'Minting failed');
-      }
-
-      // nftDetails is an ARRAY from the backend
-      if (!result.nftDetails || !Array.isArray(result.nftDetails) || result.nftDetails.length === 0) {
-        console.error('âŒ Backend returned success but nftDetails is missing or empty!');
-        console.error('Full result:', JSON.stringify(result, null, 2));
-        throw new Error('Server error: NFT details not returned');
-      }
-
-      // Get the first NFT details for validation
-      const firstNft = result.nftDetails[0];
-
-      if (!firstNft.metadataTokenId && !firstNft.serialNumber) {
-        console.error('âŒ First NFT missing both metadataTokenId and serialNumber!');
-        console.error('nftDetails:', result.nftDetails);
-        throw new Error('Server error: Incomplete NFT details');
-      }
-
-      console.log('ðŸŽ‰ NFT Minted Successfully!', result.nftDetails);
-
-      // Your IPFS CID where metadata is stored
-      const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu";
-
-      // Process ALL minted NFTs (supports batch minting)
-      const mintedNFTsArray: MintedNFT[] = [];
-
-      for (const nftDetail of result.nftDetails) {
-        const metadataTokenId = nftDetail.metadataTokenId || nftDetail.serialNumber;
-        console.log('✅ Processing NFT with metadataTokenId:', metadataTokenId);
-
-        try {
-          const metadataUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${metadataTokenId}.json`;
-          console.log(`Fetching metadata from: ${metadataUrl}`);
-
-          const metadataResponse = await fetch(metadataUrl);
-
-          if (!metadataResponse.ok) {
-            throw new Error(`IPFS fetch failed: ${metadataResponse.status}`);
-          }
-
-          const actualMetadata = await metadataResponse.json();
-          console.log('Fetched metadata:', actualMetadata);
-
-          mintedNFTsArray.push({
-            tokenId: nftDetail.tokenId || process.env.REACT_APP_HEDERA_CONTRACT_ID || '',
-            serialNumber: nftDetail.serialNumber,
-            metadata: actualMetadata
-          });
-
-        } catch (metadataError) {
-          console.error('Failed to fetch metadata for token:', metadataTokenId, metadataError);
-
-          // Fallback to basic metadata
-          mintedNFTsArray.push({
-            tokenId: nftDetail.tokenId || process.env.REACT_APP_HEDERA_CONTRACT_ID || '',
-            serialNumber: nftDetail.serialNumber,
-            metadata: {
-              name: `${tier.name} #${nftDetail.serialNumber || metadataTokenId}`,
-              image: '',
-              attributes: [
-                { trait_type: 'Tier', value: selectedTier },
-                { trait_type: 'ODIN Allocation', value: tier.odinAllocation.toString() }
-              ]
-            }
-          });
-        }
-      }
-
-      setMintedNFTs(mintedNFTsArray);
-      setMintSuccess(true);
-      setPaymentStatus('✅ Mint Complete!');
-
-      // Refresh supply and balance
-      await fetchSupply();
-      await refreshBalance();
-
-      console.log(`✅ Process completed successfully!`);
-      console.log(`   NFTs minted: ${mintedNFTsArray.length}`);
-      console.log(`   Transaction: ${paymentResult.transactionId}`);
-      console.log(`   User: ${wallet.accountId}`);
-
-      // Reset payment status after success
-      setTimeout(() => setPaymentStatus(''), 3000);
-
-    } catch (error: any) {
-      console.error('âŒ Mint error:', error);
-
-      // Check if it's a user rejection error
-      const errorMsg = error.message?.toLowerCase() || '';
-      const isRejection = errorMsg.includes('reject') ||
-        errorMsg.includes('cancel') ||
-        errorMsg.includes('denied') ||
-        (errorMsg.includes('user') && errorMsg.includes('declined'));
-
-      if (isRejection) {
-        console.log('ðŸ”• User rejected transaction - not showing error');
-        // Don't set error state for rejections
-      } else {
-        // Check for SDK query errors
-        const isQueryError = errorMsg.includes('query.frombytes') ||
-          errorMsg.includes('not implemented for type getbykey') ||
-          errorMsg.includes('txerror') ||
-          errorMsg.includes('queryerror');
-
-        if (isQueryError) {
-          setError('Please check your wallet balance before you proceed. Ensure you have sufficient HBAR for both the mint price and network fees.');
-        } else {
-          setError(error.message);
-        }
-      }
-
-      setPaymentStatus('');
-    } finally {
-      setIsMinting(false);
+    // Check if response is OK
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status} ${response.statusText}`);
     }
-  };
+
+    const result = await response.json();
+    console.log('📊 Backend response:', result);
+
+    // Check if result has success
+    if (!result.success) {
+      throw new Error(result.error || 'Minting failed');
+    }
+
+    // nftDetails is an ARRAY from the backend
+    if (!result.nftDetails || !Array.isArray(result.nftDetails) || result.nftDetails.length === 0) {
+      console.error('❌ Backend returned success but nftDetails is missing or empty!');
+      console.error('Full result:', JSON.stringify(result, null, 2));
+      throw new Error('Server error: NFT details not returned');
+    }
+
+    // Get the first NFT details for validation
+    const firstNft = result.nftDetails[0];
+
+    if (!firstNft.metadataTokenId && !firstNft.serialNumber) {
+      console.error('❌ First NFT missing both metadataTokenId and serialNumber!');
+      console.error('nftDetails:', result.nftDetails);
+      throw new Error('Server error: Incomplete NFT details');
+    }
+
+    console.log('🎉 NFT Minted Successfully!', result.nftDetails);
+
+    // Process ALL minted NFTs (supports batch minting)
+    const mintedNFTsArray: MintedNFT[] = [];
+
+    for (const nftDetail of result.nftDetails) {
+      const metadataTokenId = nftDetail.metadataTokenId || nftDetail.serialNumber;
+      console.log('✅ Processing NFT with metadataTokenId:', metadataTokenId);
+
+      try {
+        const metadataUrl = `${METADATA_BASE_URL}/${metadataTokenId}.json`;
+        console.log(`Fetching metadata from: ${metadataUrl}`);
+
+        const metadataResponse = await fetch(metadataUrl);
+
+        if (!metadataResponse.ok) {
+          throw new Error(`Server fetch failed: ${metadataResponse.status}`);
+        }
+
+        const actualMetadata = await metadataResponse.json();
+        console.log('Fetched metadata:', actualMetadata);
+
+        mintedNFTsArray.push({
+          tokenId: nftDetail.tokenId || process.env.REACT_APP_HEDERA_CONTRACT_ID || '',
+          serialNumber: nftDetail.serialNumber,
+          metadata: actualMetadata
+        });
+
+      } catch (metadataError) {
+        console.error('Failed to fetch metadata for token:', metadataTokenId, metadataError);
+
+        // Fallback to basic metadata
+        mintedNFTsArray.push({
+          tokenId: nftDetail.tokenId || process.env.REACT_APP_HEDERA_CONTRACT_ID || '',
+          serialNumber: nftDetail.serialNumber,
+          metadata: {
+            name: `${tier.name} #${nftDetail.serialNumber || metadataTokenId}`,
+            image: '',
+            attributes: [
+              { trait_type: 'Tier', value: selectedTier },
+              { trait_type: 'ODIN Allocation', value: tier.odinAllocation.toString() }
+            ]
+          }
+        });
+      }
+    }
+
+    setMintedNFTs(mintedNFTsArray);
+    setMintSuccess(true);
+    setPaymentStatus('✅ Mint Complete!');
+
+    // Refresh supply and balance
+    await fetchSupply();
+    await refreshBalance();
+
+    console.log(`✅ Process completed successfully!`);
+    console.log(`   NFTs minted: ${mintedNFTsArray.length}`);
+    console.log(`   Transaction: ${paymentResult.transactionId}`);
+    console.log(`   User: ${wallet.accountId}`);
+
+    // Reset payment status after success
+    setTimeout(() => setPaymentStatus(''), 3000);
+
+  } catch (error: any) {
+    console.error('❌ Mint error:', error);
+
+    // Check if it's a user rejection error
+    const errorMsg = error.message?.toLowerCase() || '';
+    const isRejection = errorMsg.includes('reject') ||
+      errorMsg.includes('cancel') ||
+      errorMsg.includes('denied') ||
+      (errorMsg.includes('user') && errorMsg.includes('declined'));
+
+    if (isRejection) {
+      console.log('🔕 User rejected transaction - not showing error');
+      // Don't set error state for rejections
+    } else {
+      // Check for SDK query errors
+      const isQueryError = errorMsg.includes('query.frombytes') ||
+        errorMsg.includes('not implemented for type getbykey') ||
+        errorMsg.includes('txerror') ||
+        errorMsg.includes('queryerror');
+
+      if (isQueryError) {
+        setError('Please check your wallet balance before you proceed. Ensure you have sufficient HBAR for both the mint price and network fees.');
+      } else {
+        setError(error.message);
+      }
+    }
+
+    setPaymentStatus('');
+  } finally {
+    setIsMinting(false);
+  }
+};
 
   // Reset when tier changes
   useEffect(() => {
@@ -828,94 +822,93 @@ const Mint = () => {
     };
   };
 
-  const completeMint = async (paymentId: string) => {
-    try {
-      setIsMinting(true);
-      setError(null);
+const completeMint = async (paymentId: string) => {
+  try {
+    setIsMinting(true);
+    setError(null);
 
-      // Step 2: Complete mint
-      const response = await fetch(`${API_BASE_URL}/api/mint/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentId: paymentId
-        })
-      });
+    // Step 2: Complete mint
+    const response = await fetch(`${API_BASE_URL}/api/mint/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paymentId: paymentId
+      })
+    });
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // Handle successful mint - check if it's single or batch
-      let mintedNFTs: MintedNFT[] = [];
-
-      if (result.results && Array.isArray(result.results)) {
-        // Batch mint result
-        mintedNFTs = result.results
-          .filter((r: any) => r.success)
-          .map((r: any, index: number) => ({
-            tokenId: r.tokenId,
-            serialNumber: r.serialNumber,
-            metadata: {
-              name: `${currentTier.name} #${r.metadataTokenId || index + 1}`,
-              image: '', // You'll need to get this from your metadata
-              attributes: [
-                { trait_type: 'Tier', value: selectedTier },
-                { trait_type: 'ODIN Allocation', value: r.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
-              ]
-            }
-          }));
-      } else {
-        // Single mint result
-        // Single mint result
-        const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu"; // Same CID as above
-        const metadataTokenId = result.metadataTokenId || result.serialNumber;
-
-        try {
-          const metadataUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${metadataTokenId}.json`;
-          const metadataResponse = await fetch(metadataUrl);
-          const actualMetadata = await metadataResponse.json();
-
-          const nft: MintedNFT = {
-            tokenId: result.tokenId,
-            serialNumber: result.serialNumber,
-            metadata: actualMetadata
-          };
-        } catch (error) {
-          console.error('Failed to fetch metadata:', error);
-          const nft: MintedNFT = {
-            tokenId: result.tokenId,
-            serialNumber: result.serialNumber,
-            metadata: {
-              name: `${currentTier.name} #${result.metadataTokenId || result.serialNumber}`,
-              image: '',
-              attributes: [
-                { trait_type: 'Tier', value: selectedTier },
-                { trait_type: 'ODIN Allocation', value: result.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
-              ]
-            }
-          };
-        }
-      }
-
-      setMintedNFTs(mintedNFTs);
-      setMintSuccess(true);
-
-      // Refresh supply and balance
-      await fetchSupply();
-      await refreshBalance();
-
-      console.log(`✅ Minted ${mintedNFTs.length} NFTs successfully!`);
-
-    } catch (error: any) {
-      console.error('Complete mint error:', error);
-      setError(error.message);
-    } finally {
-      setIsMinting(false);
+    if (!result.success) {
+      throw new Error(result.error);
     }
-  };
+
+    // Handle successful mint - check if it's single or batch
+    let mintedNFTs: MintedNFT[] = [];
+
+    if (result.results && Array.isArray(result.results)) {
+      // Batch mint result
+      mintedNFTs = result.results
+        .filter((r: any) => r.success)
+        .map((r: any, index: number) => ({
+          tokenId: r.tokenId,
+          serialNumber: r.serialNumber,
+          metadata: {
+            name: `${currentTier.name} #${r.metadataTokenId || index + 1}`,
+            image: '',
+            attributes: [
+              { trait_type: 'Tier', value: selectedTier },
+              { trait_type: 'ODIN Allocation', value: r.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
+            ]
+          }
+        }));
+    } else {
+      // Single mint result
+      const metadataTokenId = result.metadataTokenId || result.serialNumber;
+
+      try {
+        const metadataUrl = `${METADATA_BASE_URL}/${metadataTokenId}.json`;
+        const metadataResponse = await fetch(metadataUrl);
+        const actualMetadata = await metadataResponse.json();
+
+        mintedNFTs.push({
+          tokenId: result.tokenId,
+          serialNumber: result.serialNumber,
+          metadata: actualMetadata
+        });
+      } catch (error) {
+        console.error('Failed to fetch metadata:', error);
+        mintedNFTs.push({
+          tokenId: result.tokenId,
+          serialNumber: result.serialNumber,
+          metadata: {
+            name: `${currentTier.name} #${result.metadataTokenId || result.serialNumber}`,
+            image: '',
+            attributes: [
+              { trait_type: 'Tier', value: selectedTier },
+              { trait_type: 'ODIN Allocation', value: result.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
+            ]
+          }
+        });
+      }
+    }
+
+    setMintedNFTs(mintedNFTs);
+    setMintSuccess(true);
+
+    // Refresh supply and balance
+    await fetchSupply();
+    await refreshBalance();
+
+    console.log(`✅ Minted ${mintedNFTs.length} NFTs successfully!`);
+
+  } catch (error: any) {
+    console.error('Complete mint error:', error);
+    setError(error.message);
+  } finally {
+    setIsMinting(false);
+  }
+};
+
 
   // Simulate fetching minted NFTs (replace with actual implementation)
   const simulateFetchMintedNFTs = async (mintQuantity: number) => {
@@ -1502,7 +1495,7 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                     Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
+                    Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
