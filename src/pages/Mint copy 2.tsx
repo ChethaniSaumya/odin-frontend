@@ -11,7 +11,6 @@ import {
 // Import the Hedera Wallet Service
 import { hederaWalletService } from '../components/WalletConnect';
 import axios from 'axios';
-import AdminAirdropSection from '../components/AdminAirdropSection';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
@@ -21,7 +20,6 @@ const MIRROR_NODE_URL = NETWORK === 'mainnet'
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 const SENTX_URL = process.env.REACT_APP_SENTX_MARKETPLACE_URL;
 const KABILA_URL = process.env.REACT_APP_KABILA_MARKETPLACE_URL;
-const OPERATOR_ID = process.env.REACT_APP_OPERATOR_ID;
 
 interface NFTTier {
   name: string;
@@ -156,11 +154,13 @@ const Mint = () => {
   const [hbarUsdRate, setHbarUsdRate] = useState<number>(0.07); // Default fallback
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
 
-  const METADATA_BASE_URL = "https://min.theninerealms.world/metadata";
-
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
-      const httpUrl = `${METADATA_BASE_URL}/${tokenId}.json`;
+      // Your IPFS CID (replace with actual one)
+      const METADATA_CID = "QmYourMetadataCID"; // âš ï¸ Replace with your actual CID!
+
+      // Convert IPFS URI to HTTP gateway URL
+      const httpUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${tokenId}.json`;
 
       console.log(`Fetching metadata from: ${httpUrl}`);
       const response = await fetch(httpUrl);
@@ -171,6 +171,7 @@ const Mint = () => {
 
       const metadata = await response.json();
 
+      // Now you have the actual metadata with image
       return {
         tokenId: tokenId.toString(),
         serialNumber,
@@ -193,6 +194,25 @@ const Mint = () => {
         setDynamicPricing(response.data);
         setHbarUsdRate(response.data.hbarUsdPrice);
 
+        // Also update supply data from the same response
+        setSupplyData({
+          common: {
+            available: response.data.tiers.common.available,
+            total: 2488,
+            minted: 2488 - response.data.tiers.common.available
+          },
+          rare: {
+            available: response.data.tiers.rare.available,
+            total: 1750,
+            minted: 1750 - response.data.tiers.rare.available
+          },
+          legendary: {
+            available: response.data.tiers.legendary.available,
+            total: 750,
+            minted: 750 - response.data.tiers.legendary.available
+          }
+        });
+
         console.log('✅ Dynamic pricing loaded:', {
           hbarPrice: response.data.hbarUsdPrice,
           common: response.data.tiers.common.hbarPrice + ' HBAR',
@@ -202,8 +222,10 @@ const Mint = () => {
       }
     } catch (error) {
       console.error('Failed to fetch dynamic pricing:', error);
+      // Keep using fallback prices
     } finally {
       setPriceLoading(false);
+      setIsLoadingTiers(false);
     }
   };
 
@@ -220,20 +242,6 @@ const Mint = () => {
     const priceInterval = setInterval(fetchDynamicPricing, 60000);
 
     return () => clearInterval(priceInterval);
-  }, []);
-
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchDynamicPricing();
-      await fetchSupply(); // ⭐ ADD THIS - it was missing!
-    };
-
-    loadData();
-
-    // Refresh both every 30 seconds
-    const interval = setInterval(loadData, 30000);
-
-    return () => clearInterval(interval);
   }, []);
 
   // Initialize WalletConnect on component mount and restore session
@@ -364,52 +372,33 @@ const Mint = () => {
 
   const fetchSupply = async () => {
     try {
-      console.log('📊 Fetching supply data...');
+      setIsLoadingTiers(true); // Start loading
       const response = await axios.get(`${API_BASE_URL}/api/mint/stats`);
 
       if (response.data.success) {
         const stats = response.data;
 
-        // ⭐ FIX: Set supply data from API
         setSupplyData({
-          common: {
-            available: stats.byRarity.common.available,
-            total: stats.byRarity.common.total,
-            minted: stats.byRarity.common.minted
-          },
-          rare: {
-            available: stats.byRarity.rare.available,
-            total: stats.byRarity.rare.total,
-            minted: stats.byRarity.rare.minted
-          },
-          legendary: {
-            available: stats.byRarity.legendary.available,
-            total: stats.byRarity.legendary.total,
-            minted: stats.byRarity.legendary.minted
-          }
-        });
-
-        // ⭐ FIX: Set total minted
-        setTotalMinted(stats.totalMinted);
-
-        console.log('✅ Supply data loaded:', {
-          totalMinted: stats.totalMinted,
           common: stats.byRarity.common,
           rare: stats.byRarity.rare,
           legendary: stats.byRarity.legendary
         });
+        setTotalMinted(stats.totalMinted);
+
+        console.log('✅ Supply data loaded:', stats.byRarity);
       }
     } catch (err) {
-      console.error('❌ Failed to fetch supply:', err);
+      console.log('API not ready, using static data');
 
-      // Fallback data
+      // Use static data as fallback
       setSupplyData({
-        common: { available: 2488, total: 2488, minted: 0 },
-        rare: { available: 1750, total: 1750, minted: 0 },
-        legendary: { available: 750, total: 750, minted: 0 }
+        common: { available: 4447, total: 4447, minted: 0 },
+        rare: { available: 10, total: 10, minted: 0 },
+        legendary: { available: 2, total: 2, minted: 0 }
       });
-      setTotalMinted(0);
+      setTotalMinted(541); // Airdropped NFTs
     } finally {
+      // Always set loading to false after fetch completes
       setIsLoadingTiers(false);
     }
   };
@@ -533,7 +522,7 @@ const Mint = () => {
 
   const initiateMint = async (selectedTier: 'common' | 'rare' | 'legendary', mintQuantity: number) => {
     try {
-      console.log('🔍 DEBUG: Starting mint process');
+      console.log('ðŸ” DEBUG: Starting mint process');
       console.log('Tier:', selectedTier);
       console.log('Quantity:', mintQuantity);
 
@@ -583,12 +572,12 @@ const Mint = () => {
       // Calculate amount from frontend pricing - KEEP AS HBAR
       const amountInHbar = tier.price * mintQuantity;
 
-      console.log(`💰 Sending ${amountInHbar} HBAR for ${mintQuantity} ${selectedTier} NFT(s)`);
+      console.log(`ðŸ’° Sending ${amountInHbar} HBAR for ${mintQuantity} ${selectedTier} NFT(s)`);
 
       // Step 1: Send payment directly using WalletConnect
       setPaymentStatus('Sending payment...');
 
-      const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID as string;
+      const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID || '0.0.10168171';
 
       const paymentResult = await hederaWalletService.sendHBAR(
         treasuryAccountId,
@@ -597,7 +586,7 @@ const Mint = () => {
 
       // CHECK FOR USER REJECTION
       if (paymentResult.userRejected) {
-        console.log('👤 User rejected transaction in wallet');
+        console.log('ðŸ‘¤ User rejected transaction in wallet');
         setIsMinting(false);
         setPaymentStatus('');
         return;
@@ -608,12 +597,12 @@ const Mint = () => {
       }
 
       console.log('✅ Payment sent successfully!');
-      console.log('📋 Transaction Hash:', paymentResult.transactionId);
+      console.log('ðŸ“‹ Transaction Hash:', paymentResult.transactionId);
 
       // Step 2: Send transaction hash to backend for verification and minting
       setPaymentStatus('Verifying payment and minting NFT...');
 
-      console.log('📄 Sending to backend:', {
+      console.log('ðŸ”„ Sending to backend:', {
         userAccountId: wallet.accountId,
         rarity: selectedTier,
         quantity: mintQuantity,
@@ -637,7 +626,7 @@ const Mint = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Backend response:', result);
+      console.log('ðŸ“Š Backend response:', result);
 
       // Check if result has success
       if (!result.success) {
@@ -646,7 +635,7 @@ const Mint = () => {
 
       // nftDetails is an ARRAY from the backend
       if (!result.nftDetails || !Array.isArray(result.nftDetails) || result.nftDetails.length === 0) {
-        console.error('❌ Backend returned success but nftDetails is missing or empty!');
+        console.error('âŒ Backend returned success but nftDetails is missing or empty!');
         console.error('Full result:', JSON.stringify(result, null, 2));
         throw new Error('Server error: NFT details not returned');
       }
@@ -655,12 +644,15 @@ const Mint = () => {
       const firstNft = result.nftDetails[0];
 
       if (!firstNft.metadataTokenId && !firstNft.serialNumber) {
-        console.error('❌ First NFT missing both metadataTokenId and serialNumber!');
+        console.error('âŒ First NFT missing both metadataTokenId and serialNumber!');
         console.error('nftDetails:', result.nftDetails);
         throw new Error('Server error: Incomplete NFT details');
       }
 
-      console.log('🎉 NFT Minted Successfully!', result.nftDetails);
+      console.log('ðŸŽ‰ NFT Minted Successfully!', result.nftDetails);
+
+      // Your IPFS CID where metadata is stored
+      const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu";
 
       // Process ALL minted NFTs (supports batch minting)
       const mintedNFTsArray: MintedNFT[] = [];
@@ -670,13 +662,13 @@ const Mint = () => {
         console.log('✅ Processing NFT with metadataTokenId:', metadataTokenId);
 
         try {
-          const metadataUrl = `${METADATA_BASE_URL}/${metadataTokenId}.json`;
+          const metadataUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${metadataTokenId}.json`;
           console.log(`Fetching metadata from: ${metadataUrl}`);
 
           const metadataResponse = await fetch(metadataUrl);
 
           if (!metadataResponse.ok) {
-            throw new Error(`Server fetch failed: ${metadataResponse.status}`);
+            throw new Error(`IPFS fetch failed: ${metadataResponse.status}`);
           }
 
           const actualMetadata = await metadataResponse.json();
@@ -724,7 +716,7 @@ const Mint = () => {
       setTimeout(() => setPaymentStatus(''), 3000);
 
     } catch (error: any) {
-      console.error('❌ Mint error:', error);
+      console.error('âŒ Mint error:', error);
 
       // Check if it's a user rejection error
       const errorMsg = error.message?.toLowerCase() || '';
@@ -734,7 +726,7 @@ const Mint = () => {
         (errorMsg.includes('user') && errorMsg.includes('declined'));
 
       if (isRejection) {
-        console.log('🔕 User rejected transaction - not showing error');
+        console.log('ðŸ”• User rejected transaction - not showing error');
         // Don't set error state for rejections
       } else {
         // Check for SDK query errors
@@ -856,7 +848,7 @@ const Mint = () => {
             serialNumber: r.serialNumber,
             metadata: {
               name: `${currentTier.name} #${r.metadataTokenId || index + 1}`,
-              image: '',
+              image: '', // You'll need to get this from your metadata
               attributes: [
                 { trait_type: 'Tier', value: selectedTier },
                 { trait_type: 'ODIN Allocation', value: r.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
@@ -865,21 +857,23 @@ const Mint = () => {
           }));
       } else {
         // Single mint result
+        // Single mint result
+        const METADATA_CID = "bafybeibx4xw6e6r2x5trv4lskhtjqs2y2qfgmajbf6c3k6oohcsmv2cuwu"; // Same CID as above
         const metadataTokenId = result.metadataTokenId || result.serialNumber;
 
         try {
-          const metadataUrl = `${METADATA_BASE_URL}/${metadataTokenId}.json`;
+          const metadataUrl = `https://ipfs.io/ipfs/${METADATA_CID}/${metadataTokenId}.json`;
           const metadataResponse = await fetch(metadataUrl);
           const actualMetadata = await metadataResponse.json();
 
-          mintedNFTs.push({
+          const nft: MintedNFT = {
             tokenId: result.tokenId,
             serialNumber: result.serialNumber,
             metadata: actualMetadata
-          });
+          };
         } catch (error) {
           console.error('Failed to fetch metadata:', error);
-          mintedNFTs.push({
+          const nft: MintedNFT = {
             tokenId: result.tokenId,
             serialNumber: result.serialNumber,
             metadata: {
@@ -890,7 +884,7 @@ const Mint = () => {
                 { trait_type: 'ODIN Allocation', value: result.odinAllocation?.toString() || currentTier.odinAllocation.toString() }
               ]
             }
-          });
+          };
         }
       }
 
@@ -910,7 +904,6 @@ const Mint = () => {
       setIsMinting(false);
     }
   };
-
 
   // Simulate fetching minted NFTs (replace with actual implementation)
   const simulateFetchMintedNFTs = async (mintQuantity: number) => {
@@ -977,7 +970,7 @@ const Mint = () => {
 
   // Calculate costs
   const mintCost = currentTier.price * quantity;
-  const estimatedGas = 0.005; // Estimated gas in HBAR
+  const estimatedGas = 0.5; // Estimated gas in HBAR
   const totalCost = mintCost + estimatedGas;
 
   return (
@@ -1478,14 +1471,13 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Your NFTs will appear in your wallet immediately after transaction confirmation
-                    (Note: OdinCoin ($ODIN) will release later according to the official roadmap — it is not included with the NFT mint.)
+                    Your NFTs and $ODIN allocation will appear in your wallet immediately after transaction confirmation
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Network fees (gas) are required for all Hedera transactions – typically less than 1 HBAR
+                    Network fees (gas) are required for all Hedera transactions - typically less than 1 HBAR
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -1497,13 +1489,13 @@ const Mint = () => {
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
+                    Maximum {maxPerTransaction} NFTs per transaction - you can mint multiple times
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
                   <span className="text-base leading-relaxed flex-1">
-                    View your NFTs on Sentx, Kabila, or directly inside your HashPack wallet after minting
+                    View your NFTs on HashAxis or Zuse marketplace after minting
                   </span>
                 </div>
               </div>
@@ -1542,12 +1534,6 @@ const Mint = () => {
               </a>
             </div>
           </div>
-
-          <AdminAirdropSection
-            walletAccountId={wallet.accountId}
-            apiBaseUrl={API_BASE_URL}
-          />
-
         </div>
       </section>
 
