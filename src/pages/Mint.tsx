@@ -631,19 +631,19 @@ const Mint = () => {
         })
       });
 
-      // Check if response is OK
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
-      }
-
+      // ✅ ALWAYS parse the response body first
       const result = await response.json();
       console.log('📊 Backend response:', result);
 
-      // Check if result has success
+      // ✅ Check for success in the result, not just HTTP status
       if (!result.success) {
+        // Show warning if NFTs were actually minted
+        if (result.warning) {
+          console.warn('⚠️ Warning:', result.warning);
+        }
         throw new Error(result.error || 'Minting failed');
       }
-
+      
       // nftDetails is an ARRAY from the backend
       if (!result.nftDetails || !Array.isArray(result.nftDetails) || result.nftDetails.length === 0) {
         console.error('❌ Backend returned success but nftDetails is missing or empty!');
@@ -1093,7 +1093,7 @@ const Mint = () => {
             </div>
           )}
 
-          
+
           {/* Wallet Connection */}
           {!wallet.isConnected ? (
             <div className="max-w-md mx-auto mb-16">
@@ -1193,7 +1193,7 @@ const Mint = () => {
             </div>
           )}
 
-          
+
           <ClaimAirdropSection
             walletAccountId={wallet.accountId}
             apiBaseUrl={API_BASE_URL}
@@ -1201,7 +1201,7 @@ const Mint = () => {
               fetchSupply();
               refreshBalance();
             }}
-          />          
+          />
 
           {/* Main Minting Interface */}
           <div className="max-w-6xl mx-auto">
