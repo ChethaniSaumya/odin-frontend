@@ -168,10 +168,11 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
     }
   };
 
-  // Don't show if not connected or not eligible
+  // ✅ Don't show if not connected, not eligible, or already claimed
   if (!walletAccountId) return null;
   if (isLoading) return null;
   if (!userTier) return null;
+  if (alreadyClaimed && !claimResult) return null;  // ✅ HIDE if already claimed
 
   const tierInfo = getTierInfo();
   if (!tierInfo) return null;
@@ -191,16 +192,7 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
       {/* Main Card */}
       <div className={`bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-900/80 border-2 ${tierInfo.borderColor} rounded-3xl p-8 backdrop-blur-sm shadow-2xl`}>
         
-        {/* Already Claimed State */}
-        {alreadyClaimed && !claimResult && (
-          <div className="text-center py-8">
-            <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-green-400 mb-2">Already Claimed</h3>
-            <p className="text-gray-400">You have already claimed your airdrop NFTs.</p>
-          </div>
-        )}
-
-        {/* Claim Success State */}
+        {/* Claim Success State - Show briefly then component will hide on refresh */}
         {claimResult?.success && (
           <div className="text-center py-8">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
