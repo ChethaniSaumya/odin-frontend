@@ -11,7 +11,7 @@ import {
 // Import the Hedera Wallet Service
 import { hederaWalletService } from '../components/WalletConnect';
 import axios from 'axios';
-import AdminAirdropSection from '../components/AdminAirdropSection';
+import ClaimAirdropSection from '../components/ClaimAirdropSection';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
@@ -80,7 +80,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
     //price: 100,  // USD price (HBAR calculated dynamically)
-    price: 100,  // USD price (HBAR calculated dynamically)
+    price: 0.1,  // USD price (HBAR calculated dynamically)
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -92,7 +92,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   rare: {
     name: 'Rare Champion',
     //price: 500,  // USD price (HBAR calculated dynamically)
-    price: 500,  // USD price (HBAR calculated dynamically)
+    price: 0.2,  // USD price (HBAR calculated dynamically)
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -104,7 +104,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   legendary: {
     name: 'Legendary Hero',
     //price: 1500,  // USD price (HBAR calculated dynamically)
-    price: 1500,  // USD price (HBAR calculated dynamically)
+    price: 0.3,  // USD price (HBAR calculated dynamically)
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -1093,6 +1093,7 @@ const Mint = () => {
             </div>
           )}
 
+          
           {/* Wallet Connection */}
           {!wallet.isConnected ? (
             <div className="max-w-md mx-auto mb-16">
@@ -1191,6 +1192,16 @@ const Mint = () => {
               </div>
             </div>
           )}
+
+          
+          <ClaimAirdropSection
+            walletAccountId={wallet.accountId}
+            apiBaseUrl={API_BASE_URL}
+            onClaimSuccess={() => {
+              fetchSupply();
+              refreshBalance();
+            }}
+          />          
 
           {/* Main Minting Interface */}
           <div className="max-w-6xl mx-auto">
@@ -1543,10 +1554,6 @@ const Mint = () => {
             </div>
           </div>
 
-          <AdminAirdropSection
-            walletAccountId={wallet.accountId}
-            apiBaseUrl={API_BASE_URL}
-          />
 
         </div>
       </section>
