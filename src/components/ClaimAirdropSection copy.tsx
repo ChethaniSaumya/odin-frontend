@@ -111,12 +111,7 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
           nfts: result.nfts
         });
         setAlreadyClaimed(true);
-        onClaimSuccess?.(); // This should trigger refresh in parent
-
-        // ✅ AUTO REFRESH: Wait 3 seconds then reload the page
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+        onClaimSuccess?.();
       } else {
         setClaimResult({
           success: false,
@@ -196,14 +191,14 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
 
       {/* Main Card */}
       <div className={`bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-900/80 border-2 ${tierInfo.borderColor} rounded-3xl p-8 backdrop-blur-sm shadow-2xl`}>
-
+        
         {/* Claim Success State - Show briefly then component will hide on refresh */}
         {claimResult?.success && (
           <div className="text-center py-8">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-green-400 mb-2">Claim Successful!</h3>
             <p className="text-gray-300 mb-6">{claimResult.message}</p>
-
+            
             {claimResult.nfts && (
               <div className="grid gap-4 max-w-md mx-auto">
                 {claimResult.nfts.map((nft, index) => (
