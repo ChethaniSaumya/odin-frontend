@@ -156,7 +156,7 @@ const Mint = () => {
   const [hbarUsdRate, setHbarUsdRate] = useState<number>(0.07); // Default fallback
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
 
-  const METADATA_BASE_URL = "https://min.theninerealms.world/metadata";
+  const METADATA_BASE_URL = "https://min.theninerealms.world/metadata-odin";
 
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
