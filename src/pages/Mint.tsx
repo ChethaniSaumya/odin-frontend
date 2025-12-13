@@ -1542,7 +1542,7 @@ const Mint = () => {
                 <span>View on Sentx</span>
               </a>
 
-              {/*<a
+              <a
                 href={KABILA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -1550,7 +1550,7 @@ const Mint = () => {
               >
                 <ExternalLink className="w-5 h-5" />
                 <span>View on Kabila</span>
-              </a>*/}
+              </a>
             </div>
           </div>
 
