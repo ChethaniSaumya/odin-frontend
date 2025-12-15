@@ -5,6 +5,7 @@ interface ClaimAirdropSectionProps {
   walletAccountId: string | null;
   apiBaseUrl: string | undefined;
   onClaimSuccess?: () => void;
+  isTokenAssociated?: boolean;
 }
 
 interface EligibilityData {
@@ -27,7 +28,8 @@ interface ClaimResult {
 const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
   walletAccountId,
   apiBaseUrl,
-  onClaimSuccess
+  onClaimSuccess,
+  isTokenAssociated = false
 }) => {
   const [eligibility, setEligibility] = useState<EligibilityData | null>(null);
   const [userTier, setUserTier] = useState<'tier1' | 'tier2' | 'tier3' | null>(null);
@@ -264,7 +266,7 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
             {/* Claim Button */}
             <button
               onClick={handleClaim}
-              disabled={isClaiming}
+              disabled={isClaiming || !isTokenAssociated}
               className={`w-full py-5 rounded-xl font-bold text-xl bg-gradient-to-r ${tierInfo.gradient} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100 shadow-lg flex items-center justify-center gap-3`}
             >
               {isClaiming ? (
