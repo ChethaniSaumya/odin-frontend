@@ -1266,7 +1266,28 @@ const Mint = () => {
               <div className="max-w-4xl mx-auto mb-12 p-8 bg-yellow-900/20 border-2 border-yellow-500 rounded-2xl">
                 <h3 className="text-2xl font-bold text-yellow-400 mb-4">⚠️ Token Association Required</h3>
                 <p className="text-gray-300 mb-4">Token ID: <strong className="text-white">{CONTRACT_ID}</strong></p>
-                <button onClick={() => navigator.clipboard.writeText(CONTRACT_ID)} className="px-4 py-2 bg-yellow-600 rounded-lg">
+                <button
+                  onClick={() => {
+                    try {
+                      // Try modern API first
+                      navigator.clipboard.writeText(CONTRACT_ID).catch(() => {
+                        // Fallback: Create temporary textarea
+                        const textarea = document.createElement('textarea');
+                        textarea.value = CONTRACT_ID;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                      });
+                      alert('Token ID copied!'); // Optional visual feedback
+                    } catch (err) {
+                      console.error('Copy failed:', err);
+                    }
+                  }}
+                  className="px-4 py-2 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors"
+                >
                   Copy Token ID
                 </button>
                 <p className="text-sm text-gray-400 mt-4">
