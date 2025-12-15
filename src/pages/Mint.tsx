@@ -1270,7 +1270,7 @@ const Mint = () => {
                   Copy Token ID
                 </button>
                 <p className="text-sm text-gray-400 mt-4">
-                  Associate this token in your wallet (HashPack/Blade) before minting
+                  Associate this token in your wallet (HashPack) before minting
                 </p>
               </div>
             )}
