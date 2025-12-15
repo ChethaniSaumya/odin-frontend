@@ -253,7 +253,7 @@ const Mint = () => {
   useEffect(() => {
     const loadData = async () => {
       await fetchDynamicPricing();
-      await fetchSupply(); // ⭐ ADD THIS - it was missing!
+      await fetchAllDataFromBlockchain();
     };
 
     loadData();
@@ -364,6 +364,132 @@ const Mint = () => {
       console.log('WalletConnect initialized successfully');
     } catch (err) {
       console.error('WalletConnect initialization error:', err);
+    }
+  };
+
+  const fetchAllDataFromBlockchain = async () => {
+    try {
+      console.log('🔍 Fetching all data from blockchain...');
+      setIsLoadingTiers(true);
+
+      // Step 1: Get total supply from token info
+      const tokenResponse: Response = await fetch(
+        `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}`
+      );
+
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to fetch token data');
+      }
+
+      const tokenData: any = await tokenResponse.json();
+      const totalMinted = parseInt(tokenData.total_supply) || 0;
+
+      console.log('📊 Total minted from blockchain:', totalMinted);
+      setTotalMinted(totalMinted);
+
+      // If nothing minted yet, set empty data
+      if (totalMinted === 0) {
+        setSupplyData({
+          common: { available: 2488, total: 2488, minted: 0 },
+          rare: { available: 1750, total: 1750, minted: 0 },
+          legendary: { available: 750, total: 750, minted: 0 }
+        });
+        setIsLoadingTiers(false);
+        return;
+      }
+
+      // Step 2: Get all NFTs with pagination
+      let allNfts: any[] = [];
+      let nextLink: string | null = `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}/nfts?limit=100`;
+
+      while (nextLink) {
+        const nftsResponse: Response = await fetch(nextLink);
+        const nftsData: any = await nftsResponse.json();
+
+        allNfts = [...allNfts, ...nftsData.nfts];
+
+        nextLink = nftsData.links?.next
+          ? `${MIRROR_NODE_URL}${nftsData.links.next}`
+          : null;
+
+        console.log(`📦 Fetched ${allNfts.length} NFTs so far...`);
+      }
+
+      console.log(`✅ Total NFTs fetched: ${allNfts.length}`);
+
+      // Step 3: Count by rarity - YOUR FORMAT
+      let commonCount = 0;
+      let rareCount = 0;
+      let legendaryCount = 0;
+
+      for (const nft of allNfts) {
+        try {
+          // Decode base64 metadata
+          const metadataString: string = atob(nft.metadata);
+          const metadata: any = JSON.parse(metadataString);
+
+          // Find rarity: { "trait_type": "Rarity", "value": "Common" }
+          const rarityAttr: any = metadata.attributes?.find(
+            (attr: any) => attr.trait_type === 'Rarity'
+          );
+
+          if (!rarityAttr) {
+            console.warn(`No rarity found for NFT #${nft.serial_number}`);
+            continue;
+          }
+
+          const rarity: string = rarityAttr.value.toLowerCase();
+
+          if (rarity === 'common') {
+            commonCount++;
+          } else if (rarity === 'rare') {
+            rareCount++;
+          } else if (rarity === 'legendary') {
+            legendaryCount++;
+          } else {
+            console.warn(`Unknown rarity "${rarityAttr.value}" for NFT #${nft.serial_number}`);
+          }
+        } catch (err) {
+          console.error(`Failed to parse metadata for NFT #${nft.serial_number}:`, err);
+        }
+      }
+
+      console.log('📊 Rarity breakdown:', {
+        common: commonCount,
+        rare: rareCount,
+        legendary: legendaryCount,
+        total: commonCount + rareCount + legendaryCount
+      });
+
+      // Step 4: Update supply data
+      setSupplyData({
+        common: {
+          available: 2488 - commonCount,
+          total: 2488,
+          minted: commonCount
+        },
+        rare: {
+          available: 1750 - rareCount,
+          total: 1750,
+          minted: rareCount
+        },
+        legendary: {
+          available: 750 - legendaryCount,
+          total: 750,
+          minted: legendaryCount
+        }
+      });
+
+      console.log('✅ All data loaded from blockchain successfully!');
+
+    } catch (err) {
+      console.error('❌ Failed to fetch from blockchain:', err);
+
+      // Fallback to server API
+      console.log('⚠️ Falling back to server API...');
+      await fetchSupply();
+    } finally {
+      setIsLoadingTiers(false);
     }
   };
 
