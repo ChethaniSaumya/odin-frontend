@@ -292,6 +292,8 @@ const Mint = () => {
             provider: 'walletconnect'
           });
 
+          await checkTokenAssociation(autoRestoredAccountId);
+
           // Save to localStorage
           localStorage.setItem('walletAccountId', autoRestoredAccountId);
           localStorage.setItem('walletProvider', 'walletconnect');
