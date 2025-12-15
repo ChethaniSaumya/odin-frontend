@@ -157,8 +157,34 @@ const Mint = () => {
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
   const [isTokenAssociated, setIsTokenAssociated] = useState(false);
   const [checkingAssociation, setCheckingAssociation] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const METADATA_BASE_URL = "https://min.theninerealms.world/metadata-odin";
+
+  const handleCopyTokenId = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTRACT_ID);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      const textarea = document.createElement('textarea');
+      textarea.value = CONTRACT_ID;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  const handleRefreshAssociation = async () => {
+    if (wallet.accountId) {
+      await checkTokenAssociation(wallet.accountId);
+    }
+  };
 
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
@@ -1266,32 +1292,40 @@ const Mint = () => {
               <div className="max-w-4xl mx-auto mb-12 p-8 bg-yellow-900/20 border-2 border-yellow-500 rounded-2xl">
                 <h3 className="text-2xl font-bold text-yellow-400 mb-4">⚠️ Token Association Required</h3>
                 <p className="text-gray-300 mb-4">Token ID: <strong className="text-white">{CONTRACT_ID}</strong></p>
-                <button
-                  onClick={() => {
-                    try {
-                      // Try modern API first
-                      navigator.clipboard.writeText(CONTRACT_ID).catch(() => {
-                        // Fallback: Create temporary textarea
-                        const textarea = document.createElement('textarea');
-                        textarea.value = CONTRACT_ID;
-                        textarea.style.position = 'fixed';
-                        textarea.style.opacity = '0';
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                      });
-                      alert('Token ID copied!'); // Optional visual feedback
-                    } catch (err) {
-                      console.error('Copy failed:', err);
-                    }
-                  }}
-                  className="px-4 py-2 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors"
-                >
-                  Copy Token ID
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  <button
+                    onClick={handleCopyTokenId}
+                    className="relative px-6 py-3 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
+                  >
+                    {copySuccess ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Copied!
+                      </span>
+                    ) : (
+                      'Copy Token ID'
+                    )}
+                  </button>
+                  <button
+                    onClick={handleRefreshAssociation}
+                    disabled={checkingAssociation}
+                    className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-500 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <svg
+                      className={`w-5 h-5 ${checkingAssociation ? 'animate-spin' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {checkingAssociation ? 'Checking...' : 'Refresh Status'}
+                  </button>
+                </div>
                 <p className="text-sm text-gray-400 mt-4">
-                  Associate this token in your wallet (HashPack) before minting
+                  Associate this token in your wallet (HashPack) before minting, then click refresh
                 </p>
               </div>
             )}
