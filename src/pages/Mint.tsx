@@ -417,41 +417,61 @@ const Mint = () => {
 
       console.log(`✅ Total NFTs fetched: ${allNfts.length}`);
 
-      // Step 3: Count by rarity - YOUR FORMAT
+      // Step 3: Count by rarity - USE YOUR METADATA URL PATTERN
       let commonCount = 0;
       let rareCount = 0;
       let legendaryCount = 0;
 
-      for (const nft of allNfts) {
-        try {
-          // Decode base64 metadata
-          const metadataString: string = atob(nft.metadata);
-          const metadata: any = JSON.parse(metadataString);
+      console.log('🔍 Fetching metadata for NFTs...');
 
-          // Find rarity: { "trait_type": "Rarity", "value": "Common" }
-          const rarityAttr: any = metadata.attributes?.find(
-            (attr: any) => attr.trait_type === 'Rarity'
-          );
+      // Process in batches
+      const batchSize = 10;
+      for (let i = 0; i < allNfts.length; i += batchSize) {
+        const batch = allNfts.slice(i, i + batchSize);
 
-          if (!rarityAttr) {
-            console.warn(`No rarity found for NFT #${nft.serial_number}`);
-            continue;
+        const metadataPromises = batch.map(async (nft) => {
+          try {
+            // Use your metadata URL pattern: metadataTokenId.json
+            const metadataUrl = `${METADATA_BASE_URL}/${nft.serial_number}.json`;
+
+            const metadataResponse = await fetch(metadataUrl);
+
+            if (!metadataResponse.ok) {
+              console.warn(`Failed to fetch metadata for NFT #${nft.serial_number}`);
+              return null;
+            }
+
+            const metadata: any = await metadataResponse.json();
+
+            // Find rarity attribute
+            const rarityAttr: any = metadata.attributes?.find(
+              (attr: any) => attr.trait_type === 'Rarity'
+            );
+
+            if (!rarityAttr) {
+              console.warn(`No rarity found for NFT #${nft.serial_number}`);
+              return null;
+            }
+
+            return rarityAttr.value.toLowerCase();
+
+          } catch (err) {
+            console.error(`Failed to fetch metadata for NFT #${nft.serial_number}:`, err);
+            return null;
           }
+        });
 
-          const rarity: string = rarityAttr.value.toLowerCase();
+        // Wait for batch to complete
+        const rarities = await Promise.all(metadataPromises);
 
-          if (rarity === 'common') {
-            commonCount++;
-          } else if (rarity === 'rare') {
-            rareCount++;
-          } else if (rarity === 'legendary') {
-            legendaryCount++;
-          } else {
-            console.warn(`Unknown rarity "${rarityAttr.value}" for NFT #${nft.serial_number}`);
-          }
-        } catch (err) {
-          console.error(`Failed to parse metadata for NFT #${nft.serial_number}:`, err);
-        }
+        // Count rarities from this batch
+        rarities.forEach(rarity => {
+          if (rarity === 'common') commonCount++;
+          else if (rarity === 'rare') rareCount++;
+          else if (rarity === 'legendary') legendaryCount++;
+        });
+
+        console.log(`📊 Processed ${Math.min(i + batchSize, allNfts.length)}/${allNfts.length} NFTs...`);
       }
 
       console.log('📊 Rarity breakdown:', {
