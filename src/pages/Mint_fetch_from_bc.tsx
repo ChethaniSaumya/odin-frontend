@@ -15,8 +15,8 @@ import ClaimAirdropSection from '../components/ClaimAirdropSection';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
-const MIRROR_NODE_URL = NETWORK === 'testnet'
-  ? 'https://testnet.mirrornode.hedera.com'
+const MIRROR_NODE_URL = NETWORK === 'mainnet'
+  ? 'https://mainnet-public.mirrornode.hedera.com'
   : 'https://testnet.mirrornode.hedera.com';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 const SENTX_URL = process.env.REACT_APP_SENTX_MARKETPLACE_URL;
@@ -80,7 +80,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
     //price: 100,  // USD price (HBAR calculated dynamically)
-    price: 0.1,  // USD price (HBAR calculated dynamically)
+    price: 100,  // USD price (HBAR calculated dynamically)
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -92,7 +92,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   rare: {
     name: 'Rare Champion',
     //price: 500,  // USD price (HBAR calculated dynamically)
-    price: 0.2,  // USD price (HBAR calculated dynamically)
+    price: 500,  // USD price (HBAR calculated dynamically)
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -104,7 +104,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   legendary: {
     name: 'Legendary Hero',
     //price: 1500,  // USD price (HBAR calculated dynamically)
-    price: 0.3,  // USD price (HBAR calculated dynamically)
+    price: 1500,  // USD price (HBAR calculated dynamically)
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -253,7 +253,7 @@ const Mint = () => {
   useEffect(() => {
     const loadData = async () => {
       await fetchDynamicPricing();
-      await fetchAllDataFromBlockchain();
+      await fetchSupply(); // ⭐ ADD THIS - it was missing!
     };
 
     loadData();
@@ -364,152 +364,6 @@ const Mint = () => {
       console.log('WalletConnect initialized successfully');
     } catch (err) {
       console.error('WalletConnect initialization error:', err);
-    }
-  };
-
-  const fetchAllDataFromBlockchain = async () => {
-    try {
-      console.log('🔍 Fetching all data from blockchain...');
-      setIsLoadingTiers(true);
-
-      // Step 1: Get total supply from token info
-      const tokenResponse: Response = await fetch(
-        `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}`
-      );
-
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to fetch token data');
-      }
-
-      const tokenData: any = await tokenResponse.json();
-      const totalMinted = parseInt(tokenData.total_supply) || 0;
-
-      console.log('📊 Total minted from blockchain:', totalMinted);
-      setTotalMinted(totalMinted);
-
-      // If nothing minted yet, set empty data
-      if (totalMinted === 0) {
-        setSupplyData({
-          common: { available: 2488, total: 2488, minted: 0 },
-          rare: { available: 1750, total: 1750, minted: 0 },
-          legendary: { available: 750, total: 750, minted: 0 }
-        });
-        setIsLoadingTiers(false);
-        return;
-      }
-
-      // Step 2: Get all NFTs with pagination
-      let allNfts: any[] = [];
-      let nextLink: string | null = `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}/nfts?limit=100`;
-
-      while (nextLink) {
-        const nftsResponse: Response = await fetch(nextLink);
-        const nftsData: any = await nftsResponse.json();
-
-        allNfts = [...allNfts, ...nftsData.nfts];
-
-        nextLink = nftsData.links?.next
-          ? `${MIRROR_NODE_URL}${nftsData.links.next}`
-          : null;
-
-        console.log(`📦 Fetched ${allNfts.length} NFTs so far...`);
-      }
-
-      console.log(`✅ Total NFTs fetched: ${allNfts.length}`);
-
-      // Step 3: Count by rarity - USE YOUR METADATA URL PATTERN
-      let commonCount = 0;
-      let rareCount = 0;
-      let legendaryCount = 0;
-
-      console.log('🔍 Fetching metadata for NFTs...');
-
-      // Process in batches
-      const batchSize = 10;
-      for (let i = 0; i < allNfts.length; i += batchSize) {
-        const batch = allNfts.slice(i, i + batchSize);
-
-        const metadataPromises = batch.map(async (nft) => {
-          try {
-            // Use your metadata URL pattern: metadataTokenId.json
-            const metadataUrl = `${METADATA_BASE_URL}/${nft.serial_number}.json`;
-
-            const metadataResponse = await fetch(metadataUrl);
-
-            if (!metadataResponse.ok) {
-              console.warn(`Failed to fetch metadata for NFT #${nft.serial_number}`);
-              return null;
-            }
-
-            const metadata: any = await metadataResponse.json();
-
-            // Find rarity attribute
-            const rarityAttr: any = metadata.attributes?.find(
-              (attr: any) => attr.trait_type === 'Rarity'
-            );
-
-            if (!rarityAttr) {
-              console.warn(`No rarity found for NFT #${nft.serial_number}`);
-              return null;
-            }
-
-            return rarityAttr.value.toLowerCase();
-
-          } catch (err) {
-            console.error(`Failed to fetch metadata for NFT #${nft.serial_number}:`, err);
-            return null;
-          }
-        });
-
-        // Wait for batch to complete
-        const rarities = await Promise.all(metadataPromises);
-
-        // Count rarities from this batch
-        rarities.forEach(rarity => {
-          if (rarity === 'common') commonCount++;
-          else if (rarity === 'rare') rareCount++;
-          else if (rarity === 'legendary') legendaryCount++;
-        });
-
-        console.log(`📊 Processed ${Math.min(i + batchSize, allNfts.length)}/${allNfts.length} NFTs...`);
-      }
-
-      console.log('📊 Rarity breakdown:', {
-        common: commonCount,
-        rare: rareCount,
-        legendary: legendaryCount,
-        total: commonCount + rareCount + legendaryCount
-      });
-
-      // Step 4: Update supply data
-      setSupplyData({
-        common: {
-          available: 2488 - commonCount,
-          total: 2488,
-          minted: commonCount
-        },
-        rare: {
-          available: 1750 - rareCount,
-          total: 1750,
-          minted: rareCount
-        },
-        legendary: {
-          available: 750 - legendaryCount,
-          total: 750,
-          minted: legendaryCount
-        }
-      });
-
-      console.log('✅ All data loaded from blockchain successfully!');
-
-    } catch (err) {
-      console.error('❌ Failed to fetch from blockchain:', err);
-
-      // Fallback to server API
-      console.log('⚠️ Falling back to server API...');
-      await fetchSupply();
-    } finally {
-      setIsLoadingTiers(false);
     }
   };
 

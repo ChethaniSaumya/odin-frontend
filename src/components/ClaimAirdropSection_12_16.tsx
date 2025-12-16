@@ -5,7 +5,6 @@ interface ClaimAirdropSectionProps {
   walletAccountId: string | null;
   apiBaseUrl: string | undefined;
   onClaimSuccess?: () => void;
-  isTokenAssociated?: boolean;
 }
 
 interface EligibilityData {
@@ -28,8 +27,7 @@ interface ClaimResult {
 const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
   walletAccountId,
   apiBaseUrl,
-  onClaimSuccess,
-  isTokenAssociated = false
+  onClaimSuccess
 }) => {
   const [eligibility, setEligibility] = useState<EligibilityData | null>(null);
   const [userTier, setUserTier] = useState<'tier1' | 'tier2' | 'tier3' | null>(null);
@@ -37,7 +35,6 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimResult, setClaimResult] = useState<ClaimResult | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Load eligibility data
   useEffect(() => {
@@ -136,11 +133,6 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
     } finally {
       setIsClaiming(false);
     }
-  };
-
-  const handleRefreshPage = () => {
-    setIsRefreshing(true);
-    window.location.reload();
   };
 
   const getTierInfo = () => {
@@ -272,7 +264,7 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
             {/* Claim Button */}
             <button
               onClick={handleClaim}
-              disabled={isClaiming || !isTokenAssociated}
+              disabled={isClaiming}
               className={`w-full py-5 rounded-xl font-bold text-xl bg-gradient-to-r ${tierInfo.gradient} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100 shadow-lg flex items-center justify-center gap-3`}
             >
               {isClaiming ? (
@@ -287,27 +279,6 @@ const ClaimAirdropSection: React.FC<ClaimAirdropSectionProps> = ({
                 </>
               )}
             </button>
-
-            {/* Refresh Button */}
-            {!isTokenAssociated && (
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={handleRefreshPage}
-                  disabled={isRefreshing}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-all"
-                >
-                  <svg
-                    className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  {isRefreshing ? 'Refreshing...' : 'Refresh After Association'}
-                </button>
-              </div>
-            )}
 
             {/* Info Note */}
             <p className="text-center text-gray-500 text-sm mt-4">

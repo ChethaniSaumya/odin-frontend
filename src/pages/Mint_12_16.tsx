@@ -15,8 +15,8 @@ import ClaimAirdropSection from '../components/ClaimAirdropSection';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
-const MIRROR_NODE_URL = NETWORK === 'testnet'
-  ? 'https://testnet.mirrornode.hedera.com'
+const MIRROR_NODE_URL = NETWORK === 'mainnet'
+  ? 'https://mainnet-public.mirrornode.hedera.com'
   : 'https://testnet.mirrornode.hedera.com';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 const SENTX_URL = process.env.REACT_APP_SENTX_MARKETPLACE_URL;
@@ -80,7 +80,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   common: {
     name: 'Common Warrior',
     //price: 100,  // USD price (HBAR calculated dynamically)
-    price: 0.1,  // USD price (HBAR calculated dynamically)
+    price: 100,  // USD price (HBAR calculated dynamically)
     odinAllocation: 40000,
     benefits: [
       'Early access to The Nine Realms dashboard & app',
@@ -92,7 +92,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   rare: {
     name: 'Rare Champion',
     //price: 500,  // USD price (HBAR calculated dynamically)
-    price: 0.2,  // USD price (HBAR calculated dynamically)
+    price: 500,  // USD price (HBAR calculated dynamically)
     odinAllocation: 300000,
     benefits: [
       'Priority access to new Realm releases and Beta features',
@@ -104,7 +104,7 @@ const TIER_DEFINITIONS: Record<string, Omit<NFTTier, 'available' | 'icon'>> = {
   legendary: {
     name: 'Legendary Hero',
     //price: 1500,  // USD price (HBAR calculated dynamically)
-    price: 0.3,  // USD price (HBAR calculated dynamically)
+    price: 1500,  // USD price (HBAR calculated dynamically)
     odinAllocation: 1000000,
     benefits: [
       'Reserved whitelist for Realm Land Claim in Phase II',
@@ -155,36 +155,8 @@ const Mint = () => {
   const [dynamicPricing, setDynamicPricing] = useState<DynamicPricing | null>(null);
   const [hbarUsdRate, setHbarUsdRate] = useState<number>(0.07); // Default fallback
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
-  const [isTokenAssociated, setIsTokenAssociated] = useState(false);
-  const [checkingAssociation, setCheckingAssociation] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   const METADATA_BASE_URL = "https://min.theninerealms.world/metadata-odin";
-
-  const handleCopyTokenId = async () => {
-    try {
-      await navigator.clipboard.writeText(CONTRACT_ID);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      const textarea = document.createElement('textarea');
-      textarea.value = CONTRACT_ID;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }
-  };
-
-  const handleRefreshAssociation = async () => {
-    if (wallet.accountId) {
-      await checkTokenAssociation(wallet.accountId);
-    }
-  };
 
   const fetchNFTMetadata = async (tokenId: number, serialNumber: number) => {
     try {
@@ -253,7 +225,7 @@ const Mint = () => {
   useEffect(() => {
     const loadData = async () => {
       await fetchDynamicPricing();
-      await fetchAllDataFromBlockchain();
+      await fetchSupply(); // ⭐ ADD THIS - it was missing!
     };
 
     loadData();
@@ -291,8 +263,6 @@ const Mint = () => {
             isConnected: true,
             provider: 'walletconnect'
           });
-
-          await checkTokenAssociation(autoRestoredAccountId);
 
           // Save to localStorage
           localStorage.setItem('walletAccountId', autoRestoredAccountId);
@@ -364,170 +334,6 @@ const Mint = () => {
       console.log('WalletConnect initialized successfully');
     } catch (err) {
       console.error('WalletConnect initialization error:', err);
-    }
-  };
-
-  const fetchAllDataFromBlockchain = async () => {
-    try {
-      console.log('🔍 Fetching all data from blockchain...');
-      setIsLoadingTiers(true);
-
-      // Step 1: Get total supply from token info
-      const tokenResponse: Response = await fetch(
-        `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}`
-      );
-
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to fetch token data');
-      }
-
-      const tokenData: any = await tokenResponse.json();
-      const totalMinted = parseInt(tokenData.total_supply) || 0;
-
-      console.log('📊 Total minted from blockchain:', totalMinted);
-      setTotalMinted(totalMinted);
-
-      // If nothing minted yet, set empty data
-      if (totalMinted === 0) {
-        setSupplyData({
-          common: { available: 2488, total: 2488, minted: 0 },
-          rare: { available: 1750, total: 1750, minted: 0 },
-          legendary: { available: 750, total: 750, minted: 0 }
-        });
-        setIsLoadingTiers(false);
-        return;
-      }
-
-      // Step 2: Get all NFTs with pagination
-      let allNfts: any[] = [];
-      let nextLink: string | null = `${MIRROR_NODE_URL}/api/v1/tokens/${CONTRACT_ID}/nfts?limit=100`;
-
-      while (nextLink) {
-        const nftsResponse: Response = await fetch(nextLink);
-        const nftsData: any = await nftsResponse.json();
-
-        allNfts = [...allNfts, ...nftsData.nfts];
-
-        nextLink = nftsData.links?.next
-          ? `${MIRROR_NODE_URL}${nftsData.links.next}`
-          : null;
-
-        console.log(`📦 Fetched ${allNfts.length} NFTs so far...`);
-      }
-
-      console.log(`✅ Total NFTs fetched: ${allNfts.length}`);
-
-      // Step 3: Count by rarity - USE YOUR METADATA URL PATTERN
-      let commonCount = 0;
-      let rareCount = 0;
-      let legendaryCount = 0;
-
-      console.log('🔍 Fetching metadata for NFTs...');
-
-      // Process in batches
-      const batchSize = 10;
-      for (let i = 0; i < allNfts.length; i += batchSize) {
-        const batch = allNfts.slice(i, i + batchSize);
-
-        const metadataPromises = batch.map(async (nft) => {
-          try {
-            // Use your metadata URL pattern: metadataTokenId.json
-            const metadataUrl = `${METADATA_BASE_URL}/${nft.serial_number}.json`;
-
-            const metadataResponse = await fetch(metadataUrl);
-
-            if (!metadataResponse.ok) {
-              console.warn(`Failed to fetch metadata for NFT #${nft.serial_number}`);
-              return null;
-            }
-
-            const metadata: any = await metadataResponse.json();
-
-            // Find rarity attribute
-            const rarityAttr: any = metadata.attributes?.find(
-              (attr: any) => attr.trait_type === 'Rarity'
-            );
-
-            if (!rarityAttr) {
-              console.warn(`No rarity found for NFT #${nft.serial_number}`);
-              return null;
-            }
-
-            return rarityAttr.value.toLowerCase();
-
-          } catch (err) {
-            console.error(`Failed to fetch metadata for NFT #${nft.serial_number}:`, err);
-            return null;
-          }
-        });
-
-        // Wait for batch to complete
-        const rarities = await Promise.all(metadataPromises);
-
-        // Count rarities from this batch
-        rarities.forEach(rarity => {
-          if (rarity === 'common') commonCount++;
-          else if (rarity === 'rare') rareCount++;
-          else if (rarity === 'legendary') legendaryCount++;
-        });
-
-        console.log(`📊 Processed ${Math.min(i + batchSize, allNfts.length)}/${allNfts.length} NFTs...`);
-      }
-
-      console.log('📊 Rarity breakdown:', {
-        common: commonCount,
-        rare: rareCount,
-        legendary: legendaryCount,
-        total: commonCount + rareCount + legendaryCount
-      });
-
-      // Step 4: Update supply data
-      setSupplyData({
-        common: {
-          available: 2488 - commonCount,
-          total: 2488,
-          minted: commonCount
-        },
-        rare: {
-          available: 1750 - rareCount,
-          total: 1750,
-          minted: rareCount
-        },
-        legendary: {
-          available: 750 - legendaryCount,
-          total: 750,
-          minted: legendaryCount
-        }
-      });
-
-      console.log('✅ All data loaded from blockchain successfully!');
-
-    } catch (err) {
-      console.error('❌ Failed to fetch from blockchain:', err);
-
-      // Fallback to server API
-      console.log('⚠️ Falling back to server API...');
-      await fetchSupply();
-    } finally {
-      setIsLoadingTiers(false);
-    }
-  };
-
-  const checkTokenAssociation = async (accountId: string) => {
-    setCheckingAssociation(true);
-    try {
-      const response = await fetch(
-        `${MIRROR_NODE_URL}/api/v1/accounts/${accountId}/tokens?token.id=${CONTRACT_ID}`
-      );
-      const data = await response.json();
-      const associated = data.tokens && data.tokens.length > 0;
-      setIsTokenAssociated(associated);
-      return associated;
-    } catch (error) {
-      console.error('Association check failed:', error);
-      return false;
-    } finally {
-      setCheckingAssociation(false);
     }
   };
 
@@ -629,8 +435,7 @@ const Mint = () => {
       localStorage.setItem('walletAccountId', accountId);
       localStorage.setItem('walletProvider', 'walletconnect');
 
-      console.log('ACTUALLY CONNECTED AS:', accountId);
-      await checkTokenAssociation(accountId);
+      console.log('ðŸ”— ACTUALLY CONNECTED AS:', accountId);
 
     } catch (err: any) {
       console.error('WalletConnect connection error:', err);
@@ -1291,138 +1096,138 @@ const Mint = () => {
 
           {/* Wallet Connection */}
           {!wallet.isConnected ? (
-            <div className="max-w-md mx-auto mb-16">
-              <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
-                <h3 className="text-2xl font-bold text-center mb-6 text-amber-400">Connect Your Wallet</h3>
-                <button
-                  onClick={connectWalletConnect}
-                  disabled={connecting || isLoadingTiers}
-                  className={`w-full group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform ${connecting || isLoadingTiers
+          <div className="max-w-md mx-auto mb-16">
+            <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold text-center mb-6 text-amber-400">Connect Your Wallet</h3>
+              <button
+                onClick={connectWalletConnect}
+                disabled={connecting || isLoadingTiers} 
+                className={`w-full group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform ${connecting || isLoadingTiers
                     ? 'opacity-50 cursor-not-allowed bg-gradient-to-r from-amber-800 to-amber-900'
                     : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 hover:scale-105'
-                    }`}
-                >
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative flex items-center justify-center space-x-3">
-                    <Wallet className="w-6 h-6" />
-                    <div className="text-left">
-                      <div className="font-bold text-lg">WalletConnect</div>
-                      <div className="text-sm opacity-80">
-                        {isLoadingTiers
-                          ? 'Loading system data...'
-                          : connecting
-                            ? 'Connecting...'
-                            : 'Connect with any Hedera wallet'
-                        }
-                      </div>
+                  }`}
+              >
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center space-x-3">
+                  <Wallet className="w-6 h-6" />
+                  <div className="text-left">
+                    <div className="font-bold text-lg">WalletConnect</div>
+                    <div className="text-sm opacity-80">
+                      {isLoadingTiers
+                        ? 'Loading system data...'
+                        : connecting
+                          ? 'Connecting...'
+                          : 'Connect with any Hedera wallet'
+                      }
                     </div>
-                  </div>
-                </button>
-
-                {/* Optional: Show loading indicator */}
-                {isLoadingTiers && (
-                  <div className="mt-4 text-center">
-                    <div className="inline-flex items-center space-x-2 text-blue-300 text-sm">
-                      <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
-                      <span>Loading system data...</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-4xl mx-auto mb-12">
-              <div className="relative overflow-hidden bg-gradient-to-br from-green-900/10 via-transparent to-transparent border-2 border-green-500/40 rounded-2xl backdrop-blur-md">
-                {/* Subtle glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent" />
-
-                <div className="relative p-6 md:p-8">
-                  <div className="grid md:grid-cols-3 gap-6 items-center">
-
-                    {/* Left: Connection Status */}
-                    <div className="flex items-center justify-center md:justify-start space-x-4">
-                      <div className="relative">
-                        <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                        </div>
-                        {/* Pulse ring effect */}
-                        <div className="absolute inset-0 w-12 h-12 bg-green-500/20 rounded-full animate-ping" />
-                      </div>
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-green-400 font-semibold mb-1">
-                          Connected
-                        </div>
-                        <div className="font-mono text-base font-bold text-white">
-                          {wallet.accountId?.substring(0, 4)}...{wallet.accountId?.substring(wallet.accountId.length - 6)}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          via WalletConnect
-                        </div>
-                      </div>
-                    </div>
-
-
-                    {/* Loading State Overlay */}
-                    {isLoadingTiers && !supplyData && (
-                      <div className="max-w-4xl mx-auto mb-12">
-                        <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
-                          <div className="flex items-center justify-center space-x-3">
-                            <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
-                            <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Center: Balance Display */}
-                    <div className="text-center md:border-l md:border-r border-green-500/20 py-4 md:py-0">
-                      <div className="text-xs uppercase tracking-wider text-gray-400 mb-2 font-semibold">
-                        Wallet Balance
-                      </div>
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
-                          {wallet.balance.toFixed(2)}
-                        </div>
-                        <div className="text-lg text-amber-400/80 font-bold">
-                          HBAR
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        ≈ ${(wallet.balance * 0.07).toFixed(2)} USD
-                      </div>
-                    </div>
-
-                    {/* Right: Disconnect Button */}
-                    <div className="flex justify-center md:justify-end">
-                      <button
-                        onClick={disconnectWallet}
-                        className="group relative overflow-hidden px-6 py-3 bg-gradient-to-br from-red-600/20 to-red-700/10 hover:from-red-600/30 hover:to-red-700/20 border border-red-500/40 hover:border-red-500/60 rounded-xl transition-all duration-300 transform hover:scale-105"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        <div className="relative flex items-center space-x-2">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          <span className="font-bold text-red-400 group-hover:text-red-300 transition-colors">
-                            Disconnect
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-
                   </div>
                 </div>
+              </button>
 
-                {/* Bottom accent line */}
-                <div className="h-1 bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
-              </div>
+              {/* Optional: Show loading indicator */}
+              {isLoadingTiers && (
+                <div className="mt-4 text-center">
+                  <div className="inline-flex items-center space-x-2 text-blue-300 text-sm">
+                    <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
+                    <span>Loading system data...</span>
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
+          ) : (
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="relative overflow-hidden bg-gradient-to-br from-green-900/10 via-transparent to-transparent border-2 border-green-500/40 rounded-2xl backdrop-blur-md">
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent" />
+
+              <div className="relative p-6 md:p-8">
+                <div className="grid md:grid-cols-3 gap-6 items-center">
+
+                  {/* Left: Connection Status */}
+                  <div className="flex items-center justify-center md:justify-start space-x-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      </div>
+                      {/* Pulse ring effect */}
+                      <div className="absolute inset-0 w-12 h-12 bg-green-500/20 rounded-full animate-ping" />
+                    </div>
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-green-400 font-semibold mb-1">
+                        Connected
+                      </div>
+                      <div className="font-mono text-base font-bold text-white">
+                        {wallet.accountId?.substring(0, 4)}...{wallet.accountId?.substring(wallet.accountId.length - 6)}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        via WalletConnect
+                      </div>
+                    </div>
+                  </div>
+
+
+                  {/* Loading State Overlay */}
+                  {isLoadingTiers && !supplyData && (
+                    <div className="max-w-4xl mx-auto mb-12">
+                      <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
+                        <div className="flex items-center justify-center space-x-3">
+                          <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
+                          <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Center: Balance Display */}
+                  <div className="text-center md:border-l md:border-r border-green-500/20 py-4 md:py-0">
+                    <div className="text-xs uppercase tracking-wider text-gray-400 mb-2 font-semibold">
+                      Wallet Balance
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
+                        {wallet.balance.toFixed(2)}
+                      </div>
+                      <div className="text-lg text-amber-400/80 font-bold">
+                        HBAR
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      ≈ ${(wallet.balance * 0.07).toFixed(2)} USD
+                    </div>
+                  </div>
+
+                  {/* Right: Disconnect Button */}
+                  <div className="flex justify-center md:justify-end">
+                    <button
+                      onClick={disconnectWallet}
+                      className="group relative overflow-hidden px-6 py-3 bg-gradient-to-br from-red-600/20 to-red-700/10 hover:from-red-600/30 hover:to-red-700/20 border border-red-500/40 hover:border-red-500/60 rounded-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                      <div className="relative flex items-center space-x-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span className="font-bold text-red-400 group-hover:text-red-300 transition-colors">
+                          Disconnect
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Bottom accent line */}
+              <div className="h-1 bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
+            </div>
+          </div>
           )}
+
 
           <ClaimAirdropSection
             walletAccountId={wallet.accountId}
             apiBaseUrl={API_BASE_URL}
-            isTokenAssociated={isTokenAssociated}  // ✅ ADD THIS
             onClaimSuccess={() => {
               fetchSupply();
               refreshBalance();
@@ -1436,32 +1241,7 @@ const Mint = () => {
                 {error}
               </div>
             )}
-            {wallet.isConnected && !isTokenAssociated && (
-              <div className="max-w-4xl mx-auto mb-12 p-8 bg-yellow-900/20 border-2 border-yellow-500 rounded-2xl">
-                <h3 className="text-2xl font-bold text-yellow-400 mb-4">⚠️ Token Association Required</h3>
-                <p className="text-gray-300 mb-4">Token ID: <strong className="text-white">{CONTRACT_ID}</strong></p>
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
-                  <button
-                    onClick={handleCopyTokenId}
-                    className="relative px-6 py-3 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
-                  >
-                    {copySuccess ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copied!
-                      </span>
-                    ) : (
-                      'Copy Token ID'
-                    )}
-                  </button>
-                </div>
-                <p className="text-sm text-gray-400 mt-4">
-                  Associate this token in your wallet (HashPack) before minting, then click refresh
-                </p>
-              </div>
-            )}
+
             {/* Tier Selection */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {Object.keys(TIER_DEFINITIONS).map((key) => {
