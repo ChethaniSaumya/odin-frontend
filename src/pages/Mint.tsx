@@ -725,7 +725,6 @@ const Mint = () => {
     };
   };
 
-
   const initiateMint = async (selectedTier: 'common' | 'rare' | 'legendary', mintQuantity: number) => {
     try {
       console.log('🔍 DEBUG: Starting mint process');
@@ -741,6 +740,27 @@ const Mint = () => {
         setError('Please connect your wallet first');
         return;
       }
+
+      // ✅ STEP 1: CHECK TOKEN ASSOCIATION FIRST (BEFORE PAYMENT)
+      console.log('🔍 Checking token association BEFORE payment...');
+      setPaymentStatus('Checking token association...');
+
+      const associationResponse = await fetch(
+        `${API_BASE_URL}/api/token/association/${wallet.accountId}`
+      );
+      const associationData = await associationResponse.json();
+
+      if (!associationData.isAssociated) {
+        setError(
+          `⚠️ Token Association Required!`
+        );
+        setPaymentStatus('');
+        setIsTokenAssociated(false);
+        return;
+      }
+
+      console.log('✅ Token association confirmed - proceeding with payment');
+      setIsTokenAssociated(true);
 
       // Get tier with guaranteed pricing
       const tier = getCurrentTier();
@@ -780,7 +800,7 @@ const Mint = () => {
 
       console.log(`💰 Sending ${amountInHbar} HBAR for ${mintQuantity} ${selectedTier} NFT(s)`);
 
-      // Step 1: Send payment directly using WalletConnect
+      // STEP 2: Send payment directly using WalletConnect
       setPaymentStatus('Sending payment...');
 
       const treasuryAccountId = process.env.REACT_APP_TREASURY_ACCOUNT_ID as string;
@@ -805,10 +825,10 @@ const Mint = () => {
       console.log('✅ Payment sent successfully!');
       console.log('📋 Transaction Hash:', paymentResult.transactionId);
 
-      // Step 2: Send transaction hash to backend for verification and minting
+      // STEP 3: Send transaction hash to backend for verification and minting
       setPaymentStatus('Verifying payment and minting NFT...');
 
-      console.log('📄 Sending to backend:', {
+      console.log('📤 Sending to backend:', {
         userAccountId: wallet.accountId,
         rarity: selectedTier,
         quantity: mintQuantity,
@@ -931,20 +951,7 @@ const Mint = () => {
       if (isRejection) {
         console.log('🚫 User rejected transaction - not showing error');
       } else {
-        // ✅ ADD: Check for token association error
-        if (errorMsg.includes('token not associated') || errorMsg.includes('requiresassociation')) {
-          setError(`Please associate your wallet with token ${CONTRACT_ID} before minting. You can do this in HashPack under "Tokens" > "Add Token".`);
-          setIsTokenAssociated(false); // Update state to show association warning
-        }
-        // Check for SDK query errors
-        else if (errorMsg.includes('query.frombytes') ||
-          errorMsg.includes('not implemented for type getbykey') ||
-          errorMsg.includes('txerror') ||
-          errorMsg.includes('queryerror')) {
-          setError('Please check your wallet balance before you proceed. Ensure you have sufficient HBAR for both the mint price and network fees.');
-        } else {
-          setError(error.message);
-        }
+        setError(error.message);
       }
 
       setPaymentStatus('');
