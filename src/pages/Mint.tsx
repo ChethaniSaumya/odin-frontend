@@ -1558,7 +1558,7 @@ const Mint = () => {
             </div>
 
             {/* Quantity Selector & Mint Button */}
-            <div className="bg-gradient-to-br from-amber-900/10 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
+            <div id="mint-section" className="bg-gradient-to-br from-amber-900/10 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Left: Quantity */}
                 <div>
