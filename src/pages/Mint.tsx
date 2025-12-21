@@ -4,7 +4,7 @@ import {
   AccountId,
   ContractExecuteTransaction,
   ContractId,
-  Hbar, 
+  Hbar,
   ContractFunctionParameters,
   HbarUnit
 } from "@hashgraph/sdk";
@@ -1823,4 +1823,3 @@ const Mint = () => {
 };
 
 export default Mint;
-
