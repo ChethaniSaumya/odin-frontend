@@ -15,8 +15,8 @@ import ClaimAirdropSection from '../components/ClaimAirdropSection';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
-const MIRROR_NODE_URL = NETWORK === 'testnet'
-  ? 'https://testnet.mirrornode.hedera.com'
+const MIRROR_NODE_URL = NETWORK === 'mainnet'
+  ? 'https://mainnet-public.mirrornode.hedera.com'
   : 'https://testnet.mirrornode.hedera.com';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 const SENTX_URL = process.env.REACT_APP_SENTX_MARKETPLACE_URL;
