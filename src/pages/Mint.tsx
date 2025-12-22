@@ -12,6 +12,7 @@ import {
 import { hederaWalletService } from '../components/WalletConnect';
 import axios from 'axios';
 import ClaimAirdropSection from '../components/ClaimAirdropSection';
+import { Helmet } from 'react-helmet-async';
 
 const CONTRACT_ID = process.env.REACT_APP_HEDERA_CONTRACT_ID as string;
 const NETWORK = process.env.REACT_APP_HEDERA_NETWORK || 'testnet';
@@ -1185,640 +1186,658 @@ const Mint = () => {
   const totalCost = mintCost + estimatedGas;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white" style={{ fontFamily: "'Norse', sans-serif" }}>
-      {/* Hero Section with Odin Background */}
-      <section className="relative pt-20 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 via-transparent to-transparent" />
+    <>
+      <Helmet>
+        <title>Odin - The Nine Realms | Mint Your Viking NFT</title>
+        <meta name="description" content="Mint your exclusive Norse mythology NFT on the Hedera network. Join The Nine Realms and own a piece of Viking legend." />
+        <meta property="og:title" content="Odin - The Nine Realms | Mint Your Viking NFT" />
+        <meta property="og:description" content="Mint your exclusive Norse mythology NFT on the Hedera network. Join The Nine Realms and own a piece of Viking legend." />
+        <meta property="og:image" content="https://theninerealms.world/images/og-mint-image.jpg" />
+        <meta property="og:url" content="https://theninerealms.world/mint" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Odin - The Nine Realms | Mint Your Viking NFT" />
+        <meta name="twitter:description" content="Mint your exclusive Norse mythology NFT on the Hedera network. Join The Nine Realms and own a piece of Viking legend." />
+        <meta name="twitter:image" content="https://theninerealms.world/images/twitter-mint-image.jpg" />
+        <meta name="twitter:site" content="@HBARbarianToken" />
+        <meta name="twitter:creator" content="@HBARbarianToken" />
+      </Helmet>
 
-        {/* Golden Glow Effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/10 rounded-full blur-[120px]" />
+      <main className="min-h-screen bg-[#0a0a0a] text-white" style={{ fontFamily: "'Norse', sans-serif" }}>
+        {/* Hero Section with Odin Background */}
+        <section className="relative pt-20 pb-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 via-transparent to-transparent" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-6xl lg:text-8xl font-bold mb-6 tracking-wider">
-              <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent">
-                HBARBARIAN
-              </span>
-            </h1>
-            <p className="text-xl lg:text-2xl text-amber-100/80 mb-8">
-              ⚔️ Join The Nine Realms ⚔️
-            </p>
-            <p className="text-lg text-gray-400 max-w-3xl mx-auto font-bold">
-              Mint your legendary NFT and claim your place in the Nine Realms. Each hero grants exclusive access,
-              $ODIN tokens, and governance rights in the Digital Realms metaverse.
-            </p>
-          </div>
+          {/* Golden Glow Effect */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/10 rounded-full blur-[120px]" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header */}
+            <div className="text-center mb-16">
+              <h1 className="text-6xl lg:text-8xl font-bold mb-6 tracking-wider">
+                <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent">
+                  HBARBARIAN
+                </span>
+              </h1>
+              <p className="text-xl lg:text-2xl text-amber-100/80 mb-8">
+                ⚔️ Join The Nine Realms ⚔️
+              </p>
+              <p className="text-lg text-gray-400 max-w-3xl mx-auto font-bold">
+                Mint your legendary NFT and claim your place in the Nine Realms. Each hero grants exclusive access,
+                $ODIN tokens, and governance rights in the Digital Realms metaverse.
+              </p>
+            </div>
 
 
-          {/* Loading State Overlay */}
-          {isLoadingTiers && !supplyData && (
-            <div className="max-w-4xl mx-auto mb-12">
-              <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-center space-x-3">
-                  <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
-                  <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
+            {/* Loading State Overlay */}
+            {isLoadingTiers && !supplyData && (
+              <div className="max-w-4xl mx-auto mb-12">
+                <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
+                    <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Supply Counter */}
+            <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-4xl mx-auto">
+              <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
+                <div className="text-4xl font-bold text-amber-400 mb-2">
+                  {supplyData ? totalMinted.toLocaleString() : '...'}
+                </div>
+                <div className="text-sm text-gray-400 uppercase tracking-wider">Minted</div>
+              </div>
+              <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
+                <div className="text-4xl font-bold text-amber-400 mb-2">
+                  {supplyData ? remainingSupply.toLocaleString() : '...'}
+                </div>
+                <div className="text-sm text-gray-400 uppercase tracking-wider">Remaining</div>
+              </div>
+              <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
+                <div className="text-4xl font-bold text-amber-400 mb-2">{totalSupply.toLocaleString()}</div>
+                <div className="text-sm text-gray-400 uppercase tracking-wider">Total Supply</div>
+              </div>
+            </div>
+            {/* Ultra-Rare 1/1 Announcement */}
+            <div className="max-w-4xl mx-auto mb-12 px-4">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-black/60 to-amber-900/40 backdrop-blur-sm border-2 border-amber-500/50 p-6 md:p-8 shadow-2xl">
+                {/* Decorative corner accents */}
+                <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-amber-400/60 rounded-tl-2xl"></div>
+                <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-amber-400/60 rounded-br-2xl"></div>
+
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-amber-500/10 to-purple-500/10 animate-pulse"></div>
+
+                <div className="relative z-10">
+                  {/* Header with icon - CENTERED ON MOBILE */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+                    <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
+                    <h3 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 text-center">
+                      Ultra-Rare 1/1 Masterpieces
+                    </h3>
+                    <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mb-6"></div>
+
+                  {/* Content */}
+                  <div className="space-y-4 text-gray-200">
+                    <p className="text-base sm:text-lg leading-relaxed text-center">
+                      Alongside the Genesis mint, the collection contains{' '}
+                      <span className="text-amber-400 font-bold">twelve ultra-rare 1/1 NFTs</span>,
+                      each with its own unique artwork and lore.
+                    </p>
+
+                    <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
+                      These will <span className="text-amber-300 font-semibold">not be minted publicly</span>.
+                      Instead, they will be awarded through high-impact community activations, exclusive giveaways,
+                      auctions, and special collaborations.
+                    </p>
+
+                    <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
+                      Their scarcity—and the utility tied to them—makes these some of the{' '}
+                      <span className="text-amber-400 font-bold">most coveted pieces</span> in the entire Odin universe.
+                    </p>
+                  </div>
+
+                  {/* Badge - CENTERED ON MOBILE */}
+                  <div className="mt-6 flex justify-center">
+                    <div className="inline-flex flex-col sm:flex-row items-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-purple-600/30 to-amber-600/30 border border-amber-400/50 rounded-full text-center">
+                      <Info className="w-5 h-5 text-amber-400" />
+                      <span className="text-xs sm:text-sm font-semibold text-amber-300">
+                        12 Legendary 1/1 Editions • Distribution via Special Events
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Supply Counter */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
-              <div className="text-4xl font-bold text-amber-400 mb-2">
-                {supplyData ? totalMinted.toLocaleString() : '...'}
+            {/* Wallet Connection */}
+            {!wallet.isConnected ? (
+              <div className="max-w-md mx-auto mb-16">
+                <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
+                  <h3 className="text-2xl font-bold text-center mb-6 text-amber-400">Connect Your Wallet</h3>
+                  <button
+                    onClick={connectWalletConnect}
+                    disabled={connecting || isLoadingTiers}
+                    className={`w-full group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform ${connecting || isLoadingTiers
+                      ? 'opacity-50 cursor-not-allowed bg-gradient-to-r from-amber-800 to-amber-900'
+                      : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 hover:scale-105'
+                      }`}
+                  >
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative flex items-center justify-center space-x-3">
+                      <Wallet className="w-6 h-6" />
+                      <div className="text-left">
+                        <div className="font-bold text-lg">WalletConnect</div>
+                        <div className="text-sm opacity-80">
+                          {isLoadingTiers
+                            ? 'Loading system data...'
+                            : connecting
+                              ? 'Connecting...'
+                              : 'Connect with any Hedera wallet'
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Optional: Show loading indicator */}
+                  {isLoadingTiers && (
+                    <div className="mt-4 text-center">
+                      <div className="inline-flex items-center space-x-2 text-blue-300 text-sm">
+                        <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
+                        <span>Loading system data...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="text-sm text-gray-400 uppercase tracking-wider">Minted</div>
-            </div>
-            <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
-              <div className="text-4xl font-bold text-amber-400 mb-2">
-                {supplyData ? remainingSupply.toLocaleString() : '...'}
+            ) : (
+              <div className="max-w-4xl mx-auto mb-12">
+                <div className="relative overflow-hidden bg-gradient-to-br from-green-900/10 via-transparent to-transparent border-2 border-green-500/40 rounded-2xl backdrop-blur-md">
+                  {/* Subtle glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent" />
+
+                  <div className="relative p-6 md:p-8">
+                    <div className="grid md:grid-cols-3 gap-6 items-center">
+
+                      {/* Left: Connection Status */}
+                      <div className="flex items-center justify-center md:justify-start space-x-4">
+                        <div className="relative">
+                          <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                          </div>
+                          {/* Pulse ring effect */}
+                          <div className="absolute inset-0 w-12 h-12 bg-green-500/20 rounded-full animate-ping" />
+                        </div>
+                        <div>
+                          <div className="text-xs uppercase tracking-wider text-green-400 font-semibold mb-1">
+                            Connected
+                          </div>
+                          <div className="font-mono text-base font-bold text-white">
+                            {wallet.accountId?.substring(0, 4)}...{wallet.accountId?.substring(wallet.accountId.length - 6)}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            via WalletConnect
+                          </div>
+                        </div>
+                      </div>
+
+
+                      {/* Loading State Overlay */}
+                      {isLoadingTiers && !supplyData && (
+                        <div className="max-w-4xl mx-auto mb-12">
+                          <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
+                            <div className="flex items-center justify-center space-x-3">
+                              <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
+                              <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Center: Balance Display */}
+                      <div className="text-center md:border-l md:border-r border-green-500/20 py-4 md:py-0">
+                        <div className="text-xs uppercase tracking-wider text-gray-400 mb-2 font-semibold">
+                          Wallet Balance
+                        </div>
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
+                            {wallet.balance.toFixed(2)}
+                          </div>
+                          <div className="text-lg text-amber-400/80 font-bold">
+                            HBAR
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          ≈ ${(wallet.balance * 0.07).toFixed(2)} USD
+                        </div>
+                      </div>
+
+                      {/* Right: Disconnect Button */}
+                      <div className="flex justify-center md:justify-end">
+                        <button
+                          onClick={disconnectWallet}
+                          className="group relative overflow-hidden px-6 py-3 bg-gradient-to-br from-red-600/20 to-red-700/10 hover:from-red-600/30 hover:to-red-700/20 border border-red-500/40 hover:border-red-500/60 rounded-xl transition-all duration-300 transform hover:scale-105"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                          <div className="relative flex items-center space-x-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span className="font-bold text-red-400 group-hover:text-red-300 transition-colors">
+                              Disconnect
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Bottom accent line */}
+                  <div className="h-1 bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
+                </div>
               </div>
-              <div className="text-sm text-gray-400 uppercase tracking-wider">Remaining</div>
-            </div>
-            <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-2xl p-6 text-center backdrop-blur-sm">
-              <div className="text-4xl font-bold text-amber-400 mb-2">{totalSupply.toLocaleString()}</div>
-              <div className="text-sm text-gray-400 uppercase tracking-wider">Total Supply</div>
-            </div>
-          </div>
-          {/* Ultra-Rare 1/1 Announcement */}
-          <div className="max-w-4xl mx-auto mb-12 px-4">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-black/60 to-amber-900/40 backdrop-blur-sm border-2 border-amber-500/50 p-6 md:p-8 shadow-2xl">
-              {/* Decorative corner accents */}
-              <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-amber-400/60 rounded-tl-2xl"></div>
-              <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-amber-400/60 rounded-br-2xl"></div>
+            )}
 
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-amber-500/10 to-purple-500/10 animate-pulse"></div>
+            <ClaimAirdropSection
+              walletAccountId={wallet.accountId}
+              apiBaseUrl={API_BASE_URL}
+              isTokenAssociated={isTokenAssociated}  // ✅ ADD THIS
+              onClaimSuccess={() => {
+                fetchSupply();
+                refreshBalance();
+              }}
+            />
 
-              <div className="relative z-10">
-                {/* Header with icon - CENTERED ON MOBILE */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-                  <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
-                  <h3 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 text-center">
-                    Ultra-Rare 1/1 Masterpieces
-                  </h3>
-                  <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-pulse" />
+            {/* Main Minting Interface */}
+            <div className="max-w-6xl mx-auto">
+              {error && !error.toLowerCase().includes('reject') && !error.toLowerCase().includes('cancel') && !error.toLowerCase().includes('denied') && (
+                <div className="mb-8 p-4 bg-red-900/20 border border-red-500/50 rounded-xl text-red-400 text-center">
+                  {error}
+                </div>
+              )}
+              {wallet.isConnected && !isTokenAssociated && (
+                <div className="max-w-4xl mx-auto mb-12 p-8 bg-yellow-900/20 border-2 border-yellow-500 rounded-2xl">
+                  <h3 className="text-2xl font-bold text-yellow-400 mb-4">⚠️ Token Association Required</h3>
+                  <p className="text-gray-300 mb-4">Token ID: <strong className="text-white">{CONTRACT_ID}</strong></p>
+                  <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    <button
+                      onClick={handleCopyTokenId}
+                      className="relative px-6 py-3 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
+                    >
+                      {copySuccess ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Copied!
+                        </span>
+                      ) : (
+                        'Copy Token ID'
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-4">
+                    Associate this token in your wallet (HashPack) before minting, then click refresh
+                  </p>
+                </div>
+              )}
+              {/* Tier Selection */}
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
+                {Object.keys(TIER_DEFINITIONS).map((key) => {
+                  const tier = tiers[key] || {
+                    name: TIER_DEFINITIONS[key].name,
+                    price: TIER_DEFINITIONS[key].price,
+                    odinAllocation: TIER_DEFINITIONS[key].odinAllocation,
+                    available: 0,
+                    icon: TIER_ICONS[key as keyof typeof TIER_ICONS],
+                    benefits: TIER_DEFINITIONS[key].benefits,
+                    color: TIER_DEFINITIONS[key].color
+                  };
+
+                  const Icon = tier.icon;
+                  const isSelected = selectedTier === key;
+
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedTier(key as any)}
+                      className={`relative overflow-hidden rounded-2xl p-6 transition-all duration-300 transform ${isSelected
+                        ? 'scale-105 shadow-2xl shadow-amber-500/50'
+                        : 'hover:scale-102 opacity-80 hover:opacity-100'
+                        }`}
+                      style={{
+                        background: isSelected
+                          ? `linear-gradient(135deg, ${tier.color.split(' ')[0].replace('from-', '')} 0%, ${tier.color.split(' ')[1].replace('to-', '')} 100%)`
+                          : 'rgba(20, 20, 20, 0.5)',
+                        border: isSelected ? '2px solid rgb(251, 191, 36)' : '1px solid rgba(255, 255, 255, 0.1)'
+                      }}
+                    >
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+                      )}
+
+                      <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-4">
+                          <Icon className="w-10 h-10" />
+                          {isSelected && (
+                            <div className="w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
+                              <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+
+                        <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                        <div className="text-center mb-4">
+                          <div className="text-2xl font-bold text-green-400">
+                            ${dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.usdPrice || TIER_DEFINITIONS[key].price}
+                          </div>
+                          <div className="text-xl font-bold text-amber-400">
+                            {dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.hbarPrice?.toLocaleString() || '...'} HBAR
+                          </div>
+                        </div>
+
+
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center justify-between text-base">
+                            <span className="text-gray-300">$ODIN Allocation</span>
+                            <span className="font-bold text-amber-400 text-lg">{tier.odinAllocation.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-base">
+                            <span className="text-gray-300">Available</span>
+                            <span className="font-bold text-lg">{supplyData ? supplyData[key as keyof typeof supplyData]?.available || 0 : '...'}</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-white/10">
+                          <div className="text-sm text-gray-300 space-y-2">
+                            {tier.benefits.slice(0, 2).map((benefit, i) => (
+                              <div key={i} className="flex items-start text-base leading-relaxed">
+                                <span className="text-amber-400 mr-2 text-lg">•</span>
+                                <span>{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quantity Selector & Mint Button */}
+              <div id="mint-section" className="bg-gradient-to-br from-amber-900/10 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Left: Quantity */}
+                  <div>
+                    <h3 className="text-xl font-bold mb-6 text-amber-400">Select Quantity</h3>
+                    <div className="flex items-center justify-center space-x-8 mb-8">
+                      <button
+                        onClick={decrementQuantity}
+                        disabled={quantity <= 1}
+                        className="w-14 h-14 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-6 h-6" />
+                      </button>
+
+                      <div className="text-center">
+                        <div className="text-6xl font-bold text-amber-400">{quantity}</div>
+                        <div className="text-sm text-gray-400 mt-2">Max {maxPerTransaction} per transaction</div>
+                      </div>
+
+                      <button
+                        onClick={incrementQuantity}
+                        disabled={quantity >= maxPerTransaction}
+                        className="w-14 h-14 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-6 h-6" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right: Cost Breakdown */}
+                  <div>
+
+                    <div className="space-y-4 mb-6">
+                      <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                        <span className="text-gray-300">{quantity} × {currentTier.name}</span>
+                        <div className="text-right">
+                          <div className="font-bold text-lg">{(currentTier.price * quantity).toLocaleString()} HBAR</div>
+                          <div className="text-sm text-green-400">${((currentTier.usdPrice || 0) * quantity).toLocaleString()}</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                        <span className="text-gray-300">Network Fee (est.)</span>
+                        <span className="font-bold">{estimatedGas} HBAR</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-xl font-bold">Total Cost</span>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-amber-400">
+                            {(currentTier.price * quantity + estimatedGas).toLocaleString()} HBAR
+                          </div>
+                          <div className="text-lg text-green-400">
+                            ${((currentTier.usdPrice || 0) * quantity).toLocaleString()} USD
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Updated Mint Button */}
+                    {/* Updated Mint Button */}
+                    <button
+                      onClick={() => {
+                        const tier = getCurrentTier();
+                        // This check is now redundant but keep for safety
+                        if (tier.price === 0) {
+                          setError('Tier data is not loaded yet. Please wait...');
+                          return;
+                        }
+                        initiateMint(selectedTier, quantity);
+                      }}
+                      disabled={!wallet.isConnected || isMinting || isLoadingTiers || !supplyData}
+                      className="w-full py-6 rounded-xl font-bold text-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-amber-500/50"
+                    >
+                      {isMinting ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin h-6 w-6 mr-3" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Minting {quantity} Hero{quantity > 1 ? 'es' : ''}...
+                        </span>
+                      ) : !wallet.isConnected ? (
+                        'Connect Wallet to Mint'
+                      ) : isLoadingTiers ? (
+                        'Loading Tier Data...'
+                      ) : !supplyData ? (
+                        'Loading Supply...'
+                      ) : (
+                        `⚔️ MINT ${quantity} ${quantity > 1 ? 'HEROES' : 'HERO'} ⚔️`
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Divider */}
-                <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mb-6"></div>
+                {/* Error Message */}
+                {error && (
+                  <div className="mt-6 p-4 bg-red-900/20 border border-red-500/50 rounded-xl text-red-400 text-center">
+                    {error}
+                  </div>
+                )}
+              </div>
 
-                {/* Content */}
-                <div className="space-y-4 text-gray-200">
-                  <p className="text-base sm:text-lg leading-relaxed text-center">
-                    Alongside the Genesis mint, the collection contains{' '}
-                    <span className="text-amber-400 font-bold">twelve ultra-rare 1/1 NFTs</span>,
-                    each with its own unique artwork and lore.
-                  </p>
+              {/* Success & Minted NFTs Display */}
+              {/* Simple Success Message */}
+              {mintSuccess && (
+                <div className="mt-8">
+                  <div className="bg-gradient-to-r from-green-500/10 via-green-500/5 to-transparent border-l-4 border-green-500 rounded-r-lg p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-green-500/20 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-green-400 mb-1">
+                          NFT{mintedNFTs.length > 1 ? 's' : ''} Minted Successfully!
+                        </h4>
+                        <p className="text-gray-300">
+                          Your {currentTier.name} NFT{mintedNFTs.length > 1 ? 's have' : ' has'} been transferred to your wallet.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                  <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
-                    These will <span className="text-amber-300 font-semibold">not be minted publicly</span>.
-                    Instead, they will be awarded through high-impact community activations, exclusive giveaways,
-                    auctions, and special collaborations.
-                  </p>
+              {paymentStatus && (
+                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-xl text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
+                    <span className="text-blue-300">{paymentStatus}</span>
+                  </div>
+                </div>
+              )}
 
-                  <p className="text-sm sm:text-base leading-relaxed text-center text-gray-300">
-                    Their scarcity—and the utility tied to them—makes these some of the{' '}
-                    <span className="text-amber-400 font-bold">most coveted pieces</span> in the entire Odin universe.
-                  </p>
+              {/* Benefits Section */}
+              <div className="mt-16 grid md:grid-cols-3 gap-6">
+                {Object.entries(TIER_DEFINITIONS).map(([key, tierDef]) => {
+                  const Icon = TIER_ICONS[key as keyof typeof TIER_ICONS];
+                  const colorClass = key === 'common' ? 'text-amber-400' : key === 'rare' ? 'text-blue-400' : 'text-amber-300';
+                  const borderClass = key === 'common' ? 'border-amber-500/30' : key === 'rare' ? 'border-blue-500/30' : 'border-amber-400/50';
+                  const bgClass = key === 'common' ? 'from-amber-900/20' : key === 'rare' ? 'from-blue-900/20' : 'from-amber-600/20';
+
+                  return (
+                    <div key={key} className={`bg-gradient-to-br ${bgClass} to-transparent border ${borderClass} rounded-2xl p-6 backdrop-blur-sm`}>
+                      <div className={`${colorClass} mb-4`}>
+                        <Icon className="w-12 h-12" />
+                      </div>
+                      <h4 className="text-2xl font-bold mb-3">{tierDef.name} Holders</h4>
+                      <ul className="space-y-3 text-lg text-gray-300">
+                        {tierDef.benefits.map((benefit, i) => (
+                          <li key={i} className="flex items-start">
+                            <span className={`${colorClass} mr-3 text-xl`}>•</span>
+                            <span className="text-lg leading-relaxed">{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Royalties Info */}
+              <div className="mt-12 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
+                <div className="flex items-center space-x-3 mb-4">
+                  <Info className="w-6 h-6 md:w-8 md:h-8 text-purple-400 flex-shrink-0" />
+                  <h4 className="text-xl md:text-2xl font-bold text-purple-400">Royalties & Distribution</h4>
                 </div>
 
-                {/* Badge - CENTERED ON MOBILE */}
-                <div className="mt-6 flex justify-center">
-                  <div className="inline-flex flex-col sm:flex-row items-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-purple-600/30 to-amber-600/30 border border-amber-400/50 rounded-full text-center">
-                    <Info className="w-5 h-5 text-amber-400" />
-                    <span className="text-xs sm:text-sm font-semibold text-amber-300">
-                      12 Legendary 1/1 Editions • Distribution via Special Events
+                <p className="text-gray-300 mb-6 text-base leading-relaxed">
+                  8% royalty on all secondary sales
+                </p>
+
+              </div>
+
+              {/* Important Information */}
+              <div className="mt-8 bg-gradient-to-br from-red-900/20 to-transparent border border-red-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
+                <div className="flex items-center space-x-3 mb-6">
+                  <Info className="w-8 h-8 text-red-400 flex-shrink-0" />
+                  <h4 className="text-xl md:text-2xl font-bold text-red-400 leading-none">Important Information</h4>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      Each Odin is randomly generated with unique traits and attributes
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      Your NFTs will appear in your wallet immediately after transaction confirmation
+                      (Note: OdinCoin ($ODIN) will release later according to the official roadmap — it is not included with the NFT mint.)
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      Network fees (gas) are required for all Hedera transactions – typically less than 1 HBAR
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      Ensure you have sufficient HBAR balance to cover both the mint price and network fees
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
+                    <span className="text-base leading-relaxed flex-1">
+                      View your NFTs on Sentx, Kabila, or directly inside your HashPack wallet after minting
                     </span>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Wallet Connection */}
-          {!wallet.isConnected ? (
-            <div className="max-w-md mx-auto mb-16">
-              <div className="bg-gradient-to-br from-amber-900/20 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
-                <h3 className="text-2xl font-bold text-center mb-6 text-amber-400">Connect Your Wallet</h3>
-                <button
-                  onClick={connectWalletConnect}
-                  disabled={connecting || isLoadingTiers}
-                  className={`w-full group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform ${connecting || isLoadingTiers
-                    ? 'opacity-50 cursor-not-allowed bg-gradient-to-r from-amber-800 to-amber-900'
-                    : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 hover:scale-105'
-                    }`}
+              {/* Contract & Collection Links */}
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
+                <a
+                  href={`https://hashscan.io/${NETWORK}/token/${CONTRACT_ID}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
                 >
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative flex items-center justify-center space-x-3">
-                    <Wallet className="w-6 h-6" />
-                    <div className="text-left">
-                      <div className="font-bold text-lg">WalletConnect</div>
-                      <div className="text-sm opacity-80">
-                        {isLoadingTiers
-                          ? 'Loading system data...'
-                          : connecting
-                            ? 'Connecting...'
-                            : 'Connect with any Hedera wallet'
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </button>
+                  <ExternalLink className="w-5 h-5" />
+                  <span>View Smart Contract</span>
+                </a>
 
-                {/* Optional: Show loading indicator */}
-                {isLoadingTiers && (
-                  <div className="mt-4 text-center">
-                    <div className="inline-flex items-center space-x-2 text-blue-300 text-sm">
-                      <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
-                      <span>Loading system data...</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-4xl mx-auto mb-12">
-              <div className="relative overflow-hidden bg-gradient-to-br from-green-900/10 via-transparent to-transparent border-2 border-green-500/40 rounded-2xl backdrop-blur-md">
-                {/* Subtle glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent" />
+                <a
+                  href={SENTX_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                  <span>View on Sentx</span>
+                </a>
 
-                <div className="relative p-6 md:p-8">
-                  <div className="grid md:grid-cols-3 gap-6 items-center">
-
-                    {/* Left: Connection Status */}
-                    <div className="flex items-center justify-center md:justify-start space-x-4">
-                      <div className="relative">
-                        <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/50">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                        </div>
-                        {/* Pulse ring effect */}
-                        <div className="absolute inset-0 w-12 h-12 bg-green-500/20 rounded-full animate-ping" />
-                      </div>
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-green-400 font-semibold mb-1">
-                          Connected
-                        </div>
-                        <div className="font-mono text-base font-bold text-white">
-                          {wallet.accountId?.substring(0, 4)}...{wallet.accountId?.substring(wallet.accountId.length - 6)}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          via WalletConnect
-                        </div>
-                      </div>
-                    </div>
-
-
-                    {/* Loading State Overlay */}
-                    {isLoadingTiers && !supplyData && (
-                      <div className="max-w-4xl mx-auto mb-12">
-                        <div className="bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/30 rounded-2xl p-6 backdrop-blur-sm">
-                          <div className="flex items-center justify-center space-x-3">
-                            <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
-                            <span className="text-blue-300 text-lg font-semibold">Loading tier data from blockchain...</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Center: Balance Display */}
-                    <div className="text-center md:border-l md:border-r border-green-500/20 py-4 md:py-0">
-                      <div className="text-xs uppercase tracking-wider text-gray-400 mb-2 font-semibold">
-                        Wallet Balance
-                      </div>
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
-                          {wallet.balance.toFixed(2)}
-                        </div>
-                        <div className="text-lg text-amber-400/80 font-bold">
-                          HBAR
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        ≈ ${(wallet.balance * 0.07).toFixed(2)} USD
-                      </div>
-                    </div>
-
-                    {/* Right: Disconnect Button */}
-                    <div className="flex justify-center md:justify-end">
-                      <button
-                        onClick={disconnectWallet}
-                        className="group relative overflow-hidden px-6 py-3 bg-gradient-to-br from-red-600/20 to-red-700/10 hover:from-red-600/30 hover:to-red-700/20 border border-red-500/40 hover:border-red-500/60 rounded-xl transition-all duration-300 transform hover:scale-105"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        <div className="relative flex items-center space-x-2">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          <span className="font-bold text-red-400 group-hover:text-red-300 transition-colors">
-                            Disconnect
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* Bottom accent line */}
-                <div className="h-1 bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
-              </div>
-            </div>
-          )}
-
-          <ClaimAirdropSection
-            walletAccountId={wallet.accountId}
-            apiBaseUrl={API_BASE_URL}
-            isTokenAssociated={isTokenAssociated}  // ✅ ADD THIS
-            onClaimSuccess={() => {
-              fetchSupply();
-              refreshBalance();
-            }}
-          />
-
-          {/* Main Minting Interface */}
-          <div className="max-w-6xl mx-auto">
-            {error && !error.toLowerCase().includes('reject') && !error.toLowerCase().includes('cancel') && !error.toLowerCase().includes('denied') && (
-              <div className="mb-8 p-4 bg-red-900/20 border border-red-500/50 rounded-xl text-red-400 text-center">
-                {error}
-              </div>
-            )}
-            {wallet.isConnected && !isTokenAssociated && (
-              <div className="max-w-4xl mx-auto mb-12 p-8 bg-yellow-900/20 border-2 border-yellow-500 rounded-2xl">
-                <h3 className="text-2xl font-bold text-yellow-400 mb-4">⚠️ Token Association Required</h3>
-                <p className="text-gray-300 mb-4">Token ID: <strong className="text-white">{CONTRACT_ID}</strong></p>
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
-                  <button
-                    onClick={handleCopyTokenId}
-                    className="relative px-6 py-3 bg-yellow-600 rounded-lg hover:bg-yellow-500 transition-colors font-medium"
-                  >
-                    {copySuccess ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copied!
-                      </span>
-                    ) : (
-                      'Copy Token ID'
-                    )}
-                  </button>
-                </div>
-                <p className="text-sm text-gray-400 mt-4">
-                  Associate this token in your wallet (HashPack) before minting, then click refresh
-                </p>
-              </div>
-            )}
-            {/* Tier Selection */}
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-              {Object.keys(TIER_DEFINITIONS).map((key) => {
-                const tier = tiers[key] || {
-                  name: TIER_DEFINITIONS[key].name,
-                  price: TIER_DEFINITIONS[key].price,
-                  odinAllocation: TIER_DEFINITIONS[key].odinAllocation,
-                  available: 0,
-                  icon: TIER_ICONS[key as keyof typeof TIER_ICONS],
-                  benefits: TIER_DEFINITIONS[key].benefits,
-                  color: TIER_DEFINITIONS[key].color
-                };
-
-                const Icon = tier.icon;
-                const isSelected = selectedTier === key;
-
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedTier(key as any)}
-                    className={`relative overflow-hidden rounded-2xl p-6 transition-all duration-300 transform ${isSelected
-                      ? 'scale-105 shadow-2xl shadow-amber-500/50'
-                      : 'hover:scale-102 opacity-80 hover:opacity-100'
-                      }`}
-                    style={{
-                      background: isSelected
-                        ? `linear-gradient(135deg, ${tier.color.split(' ')[0].replace('from-', '')} 0%, ${tier.color.split(' ')[1].replace('to-', '')} 100%)`
-                        : 'rgba(20, 20, 20, 0.5)',
-                      border: isSelected ? '2px solid rgb(251, 191, 36)' : '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
-                  >
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-                    )}
-
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-4">
-                        <Icon className="w-10 h-10" />
-                        {isSelected && (
-                          <div className="w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-
-                      <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                      <div className="text-center mb-4">
-                        <div className="text-2xl font-bold text-green-400">
-                          ${dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.usdPrice || TIER_DEFINITIONS[key].price}
-                        </div>
-                        <div className="text-xl font-bold text-amber-400">
-                          {dynamicPricing?.tiers[key as keyof typeof dynamicPricing.tiers]?.hbarPrice?.toLocaleString() || '...'} HBAR
-                        </div>
-                      </div>
-
-
-
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-between text-base">
-                          <span className="text-gray-300">$ODIN Allocation</span>
-                          <span className="font-bold text-amber-400 text-lg">{tier.odinAllocation.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-base">
-                          <span className="text-gray-300">Available</span>
-                          <span className="font-bold text-lg">{supplyData ? supplyData[key as keyof typeof supplyData]?.available || 0 : '...'}</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-white/10">
-                        <div className="text-sm text-gray-300 space-y-2">
-                          {tier.benefits.slice(0, 2).map((benefit, i) => (
-                            <div key={i} className="flex items-start text-base leading-relaxed">
-                              <span className="text-amber-400 mr-2 text-lg">•</span>
-                              <span>{benefit}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Quantity Selector & Mint Button */}
-            <div id="mint-section" className="bg-gradient-to-br from-amber-900/10 to-transparent border border-amber-500/30 rounded-3xl p-8 backdrop-blur-sm">
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Left: Quantity */}
-                <div>
-                  <h3 className="text-xl font-bold mb-6 text-amber-400">Select Quantity</h3>
-                  <div className="flex items-center justify-center space-x-8 mb-8">
-                    <button
-                      onClick={decrementQuantity}
-                      disabled={quantity <= 1}
-                      className="w-14 h-14 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-                    >
-                      <Minus className="w-6 h-6" />
-                    </button>
-
-                    <div className="text-center">
-                      <div className="text-6xl font-bold text-amber-400">{quantity}</div>
-                      <div className="text-sm text-gray-400 mt-2">Max {maxPerTransaction} per transaction</div>
-                    </div>
-
-                    <button
-                      onClick={incrementQuantity}
-                      disabled={quantity >= maxPerTransaction}
-                      className="w-14 h-14 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-                    >
-                      <Plus className="w-6 h-6" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right: Cost Breakdown */}
-                <div>
-
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between items-center pb-3 border-b border-white/10">
-                      <span className="text-gray-300">{quantity} × {currentTier.name}</span>
-                      <div className="text-right">
-                        <div className="font-bold text-lg">{(currentTier.price * quantity).toLocaleString()} HBAR</div>
-                        <div className="text-sm text-green-400">${((currentTier.usdPrice || 0) * quantity).toLocaleString()}</div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center pb-3 border-b border-white/10">
-                      <span className="text-gray-300">Network Fee (est.)</span>
-                      <span className="font-bold">{estimatedGas} HBAR</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-xl font-bold">Total Cost</span>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-amber-400">
-                          {(currentTier.price * quantity + estimatedGas).toLocaleString()} HBAR
-                        </div>
-                        <div className="text-lg text-green-400">
-                          ${((currentTier.usdPrice || 0) * quantity).toLocaleString()} USD
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Updated Mint Button */}
-                  {/* Updated Mint Button */}
-                  <button
-                    onClick={() => {
-                      const tier = getCurrentTier();
-                      // This check is now redundant but keep for safety
-                      if (tier.price === 0) {
-                        setError('Tier data is not loaded yet. Please wait...');
-                        return;
-                      }
-                      initiateMint(selectedTier, quantity);
-                    }}
-                    disabled={!wallet.isConnected || isMinting || isLoadingTiers || !supplyData}
-                    className="w-full py-6 rounded-xl font-bold text-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-amber-500/50"
-                  >
-                    {isMinting ? (
-                      <span className="flex items-center justify-center">
-                        <svg className="animate-spin h-6 w-6 mr-3" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Minting {quantity} Hero{quantity > 1 ? 'es' : ''}...
-                      </span>
-                    ) : !wallet.isConnected ? (
-                      'Connect Wallet to Mint'
-                    ) : isLoadingTiers ? (
-                      'Loading Tier Data...'
-                    ) : !supplyData ? (
-                      'Loading Supply...'
-                    ) : (
-                      `⚔️ MINT ${quantity} ${quantity > 1 ? 'HEROES' : 'HERO'} ⚔️`
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mt-6 p-4 bg-red-900/20 border border-red-500/50 rounded-xl text-red-400 text-center">
-                  {error}
-                </div>
-              )}
-            </div>
-
-            {/* Success & Minted NFTs Display */}
-            {/* Simple Success Message */}
-            {mintSuccess && (
-              <div className="mt-8">
-                <div className="bg-gradient-to-r from-green-500/10 via-green-500/5 to-transparent border-l-4 border-green-500 rounded-r-lg p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-green-500/20 p-3 rounded-full">
-                      <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-bold text-green-400 mb-1">
-                        NFT{mintedNFTs.length > 1 ? 's' : ''} Minted Successfully!
-                      </h4>
-                      <p className="text-gray-300">
-                        Your {currentTier.name} NFT{mintedNFTs.length > 1 ? 's have' : ' has'} been transferred to your wallet.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {paymentStatus && (
-              <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-xl text-center">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-blue-400 rounded-full border-t-transparent"></div>
-                  <span className="text-blue-300">{paymentStatus}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Benefits Section */}
-            <div className="mt-16 grid md:grid-cols-3 gap-6">
-              {Object.entries(TIER_DEFINITIONS).map(([key, tierDef]) => {
-                const Icon = TIER_ICONS[key as keyof typeof TIER_ICONS];
-                const colorClass = key === 'common' ? 'text-amber-400' : key === 'rare' ? 'text-blue-400' : 'text-amber-300';
-                const borderClass = key === 'common' ? 'border-amber-500/30' : key === 'rare' ? 'border-blue-500/30' : 'border-amber-400/50';
-                const bgClass = key === 'common' ? 'from-amber-900/20' : key === 'rare' ? 'from-blue-900/20' : 'from-amber-600/20';
-
-                return (
-                  <div key={key} className={`bg-gradient-to-br ${bgClass} to-transparent border ${borderClass} rounded-2xl p-6 backdrop-blur-sm`}>
-                    <div className={`${colorClass} mb-4`}>
-                      <Icon className="w-12 h-12" />
-                    </div>
-                    <h4 className="text-2xl font-bold mb-3">{tierDef.name} Holders</h4>
-                    <ul className="space-y-3 text-lg text-gray-300">
-                      {tierDef.benefits.map((benefit, i) => (
-                        <li key={i} className="flex items-start">
-                          <span className={`${colorClass} mr-3 text-xl`}>•</span>
-                          <span className="text-lg leading-relaxed">{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Royalties Info */}
-            <div className="mt-12 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
-              <div className="flex items-center space-x-3 mb-4">
-                <Info className="w-6 h-6 md:w-8 md:h-8 text-purple-400 flex-shrink-0" />
-                <h4 className="text-xl md:text-2xl font-bold text-purple-400">Royalties & Distribution</h4>
-              </div>
-
-              <p className="text-gray-300 mb-6 text-base leading-relaxed">
-                8% royalty on all secondary sales
-              </p>
-
-            </div>
-
-            {/* Important Information */}
-            <div className="mt-8 bg-gradient-to-br from-red-900/20 to-transparent border border-red-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
-              <div className="flex items-center space-x-3 mb-6">
-                <Info className="w-8 h-8 text-red-400 flex-shrink-0" />
-                <h4 className="text-xl md:text-2xl font-bold text-red-400 leading-none">Important Information</h4>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    Each Odin is randomly generated with unique traits and attributes
-                  </span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    Your NFTs will appear in your wallet immediately after transaction confirmation
-                    (Note: OdinCoin ($ODIN) will release later according to the official roadmap — it is not included with the NFT mint.)
-                  </span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    Network fees (gas) are required for all Hedera transactions – typically less than 1 HBAR
-                  </span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    Ensure you have sufficient HBAR balance to cover both the mint price and network fees
-                  </span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    Maximum {maxPerTransaction} NFTs per transaction – you can mint multiple times
-                  </span>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <span className="text-red-400 text-xl flex-shrink-0 leading-none" style={{ marginTop: '0.15rem' }}>◆</span>
-                  <span className="text-base leading-relaxed flex-1">
-                    View your NFTs on Sentx, Kabila, or directly inside your HashPack wallet after minting
-                  </span>
-                </div>
+                <a
+                  href={KABILA_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                  <span>View on Kabila</span>
+                </a>
               </div>
             </div>
 
-            {/* Contract & Collection Links */}
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a
-                href={`https://hashscan.io/${NETWORK}/token/${CONTRACT_ID}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
-              >
-                <ExternalLink className="w-5 h-5" />
-                <span>View Smart Contract</span>
-              </a>
 
-              <a
-                href={SENTX_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
-              >
-                <ExternalLink className="w-5 h-5" />
-                <span>View on Sentx</span>
-              </a>
-
-              <a
-                href={KABILA_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl transition-colors"
-              >
-                <ExternalLink className="w-5 h-5" />
-                <span>View on Kabila</span>
-              </a>
-            </div>
           </div>
+        </section>
 
-
-        </div>
-      </section>
-
-    </main>
+      </main>
+    </>
   );
 };
 
